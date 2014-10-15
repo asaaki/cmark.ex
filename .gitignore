@@ -1,0 +1,23 @@
+# Elixir/Erlang/Project
+/_build
+/deps
+/docs
+/tmp
+erl_crash.dump
+*.ez
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
