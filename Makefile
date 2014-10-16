@@ -30,7 +30,6 @@ STMD_OBJS=\
 	$(STMD_SRC_DIR)/$(SRC_DIR)/utf8.o \
 	$(STMD_SRC_DIR)/$(SRC_DIR)/references.c
 
-
 NIF_SRC=$(SRC_DIR)/$(STMD)_nif.c
 NIF_LIB=$(PRIV_DIR)/$(STMD).so
 
