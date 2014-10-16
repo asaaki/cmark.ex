@@ -1,6 +1,6 @@
 # Stmd
 
-Elixir NIF for [stmd](https://github.com/jgm/stmd) (C implementation), a CommonMark parser
+Elixir NIF for [stmd](https://github.com/jgm/stmd) (C implementation), a [CommonMark](http://commonmark.org/) parser
 
 ## Install
 
