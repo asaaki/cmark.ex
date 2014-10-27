@@ -1,17 +1,17 @@
-# Stmd
+# Cmark
 
-Elixir NIF for [stmd](https://github.com/jgm/stmd) (C implementation), a [CommonMark](http://commonmark.org/) parser
+Elixir NIF for [CommonMark (in C)](https://github.com/jgm/CommonMark), a parser following the [CommonMark](http://commonmark.org/) spec.
 
 ## Install
 
 ```elixir
-{ :stmd, "~> 0.0.1" }
+{ :cmark, "~> 0.1.1" }
 ```
 
 ## Usage
 
 ```elixir
-Stmd.to_html "a markdown string"
+Cmark.to_html "a markdown string"
 #=> "<p>a markdown string</p>\n"
 ```
 
