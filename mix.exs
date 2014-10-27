@@ -50,7 +50,8 @@ defmodule Cmark.Mixfile do
 
   defp deps(:dev) do
     [
-      { :ex_doc,  "~> 0.6" }
+      { :ex_doc,  "~> 0.6" },
+      { :earmark, "~> 0.1" }
     ]
   end
   defp deps(_), do: []
