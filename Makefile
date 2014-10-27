@@ -68,9 +68,10 @@ $(NIF_LIB): $(CMARK_SRC_DIR) $(CMARK_OBJS) $(PRIV_DIR) $(NIF_SRC)
 		-o $@
 
 CMARK_ex:
+	@mix deps.get
 	@mix compile
 
-spec:	all
+spec:	all CMARK_ex
 	@perl \
 		${CMARK_SRC_DIR}/runtests.pl \
 		${CMARK_SRC_DIR}/spec.txt \
