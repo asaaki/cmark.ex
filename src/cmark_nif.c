@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 #include "erl_nif.h"
-#include "stmd.h"
+#include "cmark.h"
 
 static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
 
@@ -31,13 +31,13 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
     return enif_make_binary(env, &output_binary);
   }
 
-  document = stmd_parse_document((unsigned char*)markdown_binary.data, markdown_binary.size);
-  stmd_render_html(&html, document);
+  document = cmark_parse_document((unsigned char*)markdown_binary.data, markdown_binary.size);
+  cmark_render_html(&html, document);
   enif_alloc_binary(strbuf_len(&html), &output_binary);
   strncpy((char*)output_binary.data, strbuf_cstr(&html), strbuf_len(&html));
 
   strbuf_free(&html);
-  stmd_free_nodes(document);
+  cmark_free_nodes(document);
   enif_release_binary(&markdown_binary);
 
   return enif_make_binary(env, &output_binary);
@@ -47,4 +47,4 @@ static ErlNifFunc nif_funcs[] = {
   { "to_html", 1, to_html_nif }
 };
 
-ERL_NIF_INIT(Elixir.Stmd.Nif, nif_funcs, NULL, NULL, NULL, NULL);
+ERL_NIF_INIT(Elixir.Cmark.Nif, nif_funcs, NULL, NULL, NULL, NULL);

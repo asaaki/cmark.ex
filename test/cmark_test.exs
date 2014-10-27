@@ -1,4 +1,4 @@
-defmodule StmdTest do
+defmodule CmarkTest do
   use ExUnit.Case
 
   test "the truth" do

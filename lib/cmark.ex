@@ -1,4 +1,4 @@
-defmodule Stmd do
+defmodule Cmark do
   @moduledoc """
     Compiles Markdown formatted text into HTML
   """
@@ -51,10 +51,10 @@ defmodule Stmd do
   end
 
   defp parse_doc(document) do
-    Stmd.Nif.to_html(document)
+    Cmark.Nif.to_html(document)
   end
 
   defp parse_doc(document, callback) do
-    callback.(Stmd.Nif.to_html(document))
+    callback.(Cmark.Nif.to_html(document))
   end
 end

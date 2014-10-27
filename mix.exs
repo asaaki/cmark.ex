@@ -1,27 +1,27 @@
-defmodule Mix.Tasks.Compile.Stmd do
-  @shortdoc "Compiles stmd library"
+defmodule Mix.Tasks.Compile.Cmark do
+  @shortdoc "Compiles cmark library"
   def run(_) do
-    if Mix.shell.cmd("make priv/stmd.so") != 0 do
-      raise Mix.Error, message: "Could not run `make priv/stmd.so`. Do you have make and gcc installed?"
+    if Mix.shell.cmd("make priv/cmark.so") != 0 do
+      raise Mix.Error, message: "Could not run `make priv/cmark.so`. Do you have make and gcc installed?"
     end
   end
 end
 
-defmodule Stmd.Mixfile do
+defmodule Cmark.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app:          :stmd,
-      version:      "0.0.1",
+      app:          :cmark,
+      version:      "0.1.1",
       elixir:       "~> 1.0.1",
-      compilers:    [:stmd, :elixir, :app],
+      compilers:    [:cmark, :elixir, :app],
       deps:         deps(Mix.env),
       package:      package,
-      description:  "Elixir NIF for stmd (C implementation), a CommonMark parser",
-      name:         "stmd",
-      source_url:   "https://github.com/asaaki/stmd.ex",
-      homepage_url: "http://hexdocs.pm/stmd",
+      description:  "Elixir NIF for CommonMark, a parser following the CommonMark spec",
+      name:         "cmark",
+      source_url:   "https://github.com/asaaki/cmark.ex",
+      homepage_url: "http://hexdocs.pm/cmark",
       docs:         [readme: true, main: "README"]
     ]
   end
@@ -33,9 +33,9 @@ defmodule Stmd.Mixfile do
       contributors: ["Christoph Grabo"],
       licenses:     ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/asaaki/stmd.ex",
-        "Issues" => "https://github.com/asaaki/stmd.ex/issues",
-        "Docs"   => "http://hexdocs.pm/stmd/"
+        "GitHub" => "https://github.com/asaaki/cmark.ex",
+        "Issues" => "https://github.com/asaaki/cmark.ex/issues",
+        "Docs"   => "http://hexdocs.pm/cmark/"
       },
       files: [
         "lib",
