@@ -1,9 +1,18 @@
 defmodule Mix.Tasks.Compile.Cmark do
+  use Mix.Task
   @shortdoc "Compiles cmark library"
   def run(_) do
     if Mix.shell.cmd("make priv/cmark.so") != 0 do
       raise Mix.Error, message: "Could not run `make priv/cmark.so`. Do you have make and gcc installed?"
     end
+  end
+end
+
+defmodule Mix.Tasks.Spec do
+  use Mix.Task
+  @shortdoc "Runs spec test"
+  def run(_) do
+    Mix.shell.cmd("make spec")
   end
 end
 

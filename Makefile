@@ -70,6 +70,12 @@ $(NIF_LIB): $(CMARK_SRC_DIR) $(CMARK_OBJS) $(PRIV_DIR) $(NIF_SRC)
 CMARK_ex:
 	@mix compile
 
+spec:	all
+	@perl \
+		${CMARK_SRC_DIR}/runtests.pl \
+		${CMARK_SRC_DIR}/spec.txt \
+		./cmark_spec_runner
+
 clean:
 	-rm -rf tmp
 	-rm -rf priv
