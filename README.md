@@ -1,5 +1,7 @@
 # Cmark
 
+[![Build Status](https://travis-ci.org/asaaki/cmark.ex.svg?branch=master)](https://travis-ci.org/asaaki/cmark.ex)
+
 Elixir NIF for [CommonMark (in C)](https://github.com/jgm/CommonMark), a parser following the [CommonMark](http://commonmark.org/) spec.
 
 ## Install
