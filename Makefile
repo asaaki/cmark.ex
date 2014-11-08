@@ -41,7 +41,7 @@ all: $(NIF_LIB)
 clone_CMARK: $(CMARK_SRC_DIR)
 
 $(CMARK_SRC_DIR): $(TMP_DIR)
-	git clone --quiet --depth 10 --branch master $(CMARK_REPO) $@
+	git clone --quiet --depth 1 --branch master $(CMARK_REPO) $@
 
 $(TMP_DIR):
 	@mkdir -p $@ 2>&1 >/dev/null
