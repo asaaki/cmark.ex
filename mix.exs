@@ -2,8 +2,11 @@ defmodule Mix.Tasks.Compile.Cmark do
   use Mix.Task
   @shortdoc "Compiles cmark library"
   def run(_) do
-    if Mix.shell.cmd("make priv/cmark.so") != 0 do
-      raise Mix.Error, message: "Could not run `make priv/cmark.so`. Do you have make and gcc installed?"
+    if Mix.shell.cmd("make") != 0 do
+      raise Mix.Error, message: """
+        Could not run `make`.
+        Please check if `make`, `cmake` and `re2c` are installed.
+      """
     end
   end
 end
@@ -49,6 +52,7 @@ defmodule Cmark.Mixfile do
       files: [
         "lib",
         "src",
+        "c_src",
         "Makefile",
         "mix.exs",
         "README.md",
