@@ -1,12 +1,4 @@
-#!/usr/bin/env elixir
-Code.prepend_path("_build/dev/lib/cmark/ebin")
-
-defmodule Cmark.SpecRunner do
-  def run do
-    IO.read(:erlang.group_leader(), :all)
-      |> Cmark.to_html
-      |> IO.write
-  end
-end
-
-Cmark.SpecRunner.run
+#!/bin/sh
+CMARK_EBIN=`find _build -type d -name "cmark" | sort | head -1`/ebin
+RUNNER_CODE="IO.read(:erlang.group_leader(), :all) |> Cmark.to_html |> IO.write"
+elixir -pz $CMARK_EBIN -e "$RUNNER_CODE"
