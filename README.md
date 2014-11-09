@@ -6,8 +6,16 @@ Elixir NIF for [CommonMark (in C)](https://github.com/jgm/CommonMark), a parser 
 
 ## Install
 
+### Prerequisites
+
+You need `make` (mostly present), `cmake` and `re2c` (both are not present in default system setups).
+
+If you want to run the specs, also `perl` needs to be installed.
+
+### mix.exs
+
 ```elixir
-{ :cmark, "~> 0.1.1" }
+{ :cmark, "~> 0.2.0" }
 ```
 
 ## Usage

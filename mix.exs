@@ -25,7 +25,7 @@ defmodule Cmark.Mixfile do
   def project do
     [
       app:          :cmark,
-      version:      "0.1.1",
+      version:      "0.2.0",
       elixir:       "~> 1.0.1",
       compilers:    [:cmark, :elixir, :app],
       deps:         deps(Mix.env),
