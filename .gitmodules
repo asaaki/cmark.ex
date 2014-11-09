@@ -1,0 +1,3 @@
+[submodule "c_src"]
+	path = c_src
+	url = https://github.com/jgm/CommonMark.git
