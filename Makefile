@@ -10,16 +10,21 @@ endif
 
 NOOUT=2>&1 >/dev/null
 
+BUILD_DIR=_build
 PRIV_DIR=priv
 SRC_DIR=src
+TEST_DIR=test
 
 CMARK_SRC_DIR=c_src
 CMARK_C_SRC_DIR=$(CMARK_SRC_DIR)/$(SRC_DIR)
-CMARK_BUILD_DIR=c_build
+CMARK_BUILD_DIR=$(CMARK_SRC_DIR)/build
 CMARK_BUILD_SRC_DIR=$(CMARK_BUILD_DIR)/$(SRC_DIR)
 
 CMARK=cmark
-CMARK_SO=$(CMARK_BUILD_SRC_DIR)/lib$(CMARK).so
+CMARK_LIB=lib$(CMARK)
+CMARK_LIB_DIR=$(shell find . -type d -name "$(CMARK_LIB)*")
+CMARK_SO=$(CMARK_BUILD_SRC_DIR)/$(CMARK_LIB).so
+CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
 
 NIF_SRC=$(SRC_DIR)/$(CMARK)_nif.c
 NIF_LIB=$(PRIV_DIR)/$(CMARK).so
@@ -51,12 +56,13 @@ prerequisites: check-make check-cmake check-re2c
 
 update-deps:
 	git submodule update --init
+	cd $(CMARK_SRC_DIR) && git checkout master && git pull
 
 $(CMARK_SO):
 	mkdir -p $(CMARK_BUILD_DIR) && \
 		cd $(CMARK_BUILD_DIR) && \
-		cmake ../$(CMARK_SRC_DIR) && \
-		$(MAKE) $(CMARK)-shared
+		cmake .. && \
+		$(MAKE)
 
 $(PRIV_DIR):
 	@mkdir -p $@ $(NOOUT)
@@ -64,20 +70,33 @@ $(PRIV_DIR):
 $(NIF_LIB): $(PRIV_DIR) $(CMARK_SO)
 	$(CC) $(CFLAGS) $(ERLANG_FLAGS) $(OPTIONS) \
 		-I$(CMARK_C_SRC_DIR) \
-		$(shell find $(CMARK_BUILD_DIR) -name "*.o") \
+		-I$(CMARK_BUILD_SRC_DIR) \
+		$(shell find $(CMARK_LIB_DIR) -name "*.o") \
 		$(NIF_SRC) -o $@
 
 $(CMARK):
 	@mix deps.get
 	@mix compile
 
-spec: all $(CMARK)
-	@perl \
-		$(CMARK_SRC_DIR)/runtests.pl \
-		$(CMARK_SRC_DIR)/spec.txt \
-		./cmark_spec_runner
+spec: all spec-dump spec-reference
+	@mix test
+
+spec-reference: $(CMARK_SO)
+	-cd $(CMARK_SRC_DIR) && $(MAKE) test
+
+test: spec
+
+spec-dump: clean-$(CMARK_SPECS_JSON)
+	@python $(CMARK_SRC_DIR)/runtests.py \
+		--spec $(CMARK_SRC_DIR)/spec.txt \
+		--dump-tests > $(CMARK_SPECS_JSON) \
+	|| true
 
 clean:
-	-rm -rf $(CMARK_BUILD_DIR) $(PRIV_DIR)
+	cd $(CMARK_SRC_DIR) && $(MAKE) clean
+	rm -rf $(CMARK_BUILD_DIR) $(PRIV_DIR) $(BUILD_DIR) $(CMARK_SPECS_JSON)
 
-.PHONY: all check-cmake check-make check-re2c clean prerequisites spec update-deps $(CMARK)
+clean-$(CMARK_SPECS_JSON):
+	@rm -f $(CMARK_SPECS_JSON)
+
+.PHONY: all check-cmake check-make check-re2c clean clean-$(CMARK_SPECS_JSON) prerequisites spec spec-dump spec-reference test update-deps $(CMARK)
