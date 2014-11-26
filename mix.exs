@@ -25,10 +25,10 @@ defmodule Cmark.Mixfile do
   def project do
     [
       app:          :cmark,
-      version:      "0.2.0",
+      version:      "0.3.0",
       elixir:       "~> 1.0.1",
       compilers:    [:cmark, :elixir, :app],
-      deps:         deps(Mix.env),
+      deps:         deps,
       package:      package,
       description:  "Elixir NIF for CommonMark, a parser following the CommonMark spec",
       name:         "cmark",
@@ -61,16 +61,11 @@ defmodule Cmark.Mixfile do
     ]
   end
 
-  defp deps(:dev) do
+  defp deps do
     [
       { :ex_doc,  "~> 0.6" },
-      { :earmark, "~> 0.1" }
-    ] ++ deps(:test)
-  end
-  defp deps(:test) do
-    [
-      { :poison,  "~> 1.2" }
+      { :earmark, "~> 0.1" },
+      { :poison,  "~> 1.2", only: :test }
     ]
   end
-  defp deps(_), do: []
 end
