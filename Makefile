@@ -79,6 +79,7 @@ $(CMARK):
 	@mix compile
 
 spec: all spec-dump spec-reference
+	@mix deps.get
 	@mix test
 
 spec-reference: $(CMARK_SO)
