@@ -10,7 +10,7 @@ branches:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install clang cmake re2c perl
+  - sudo apt-get install clang cmake re2c
   - export CC=clang
   - wget https://github.com/elixir-lang/elixir/releases/download/v1.0.2/Precompiled.zip
   - unzip -d elixir Precompiled.zip
