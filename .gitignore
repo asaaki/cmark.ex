@@ -1,8 +1,8 @@
 # Elixir/Erlang/Project
 /_build
-/c_build
 /deps
 /docs
+/test/cmark_specs.json
 erl_crash.dump
 *.ez
 
