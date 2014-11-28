@@ -24,6 +24,7 @@ CMARK=cmark
 CMARK_LIB=lib$(CMARK)
 CMARK_LIB_DIR=$(shell find . -type d -name "$(CMARK_LIB)*")
 CMARK_SO=$(CMARK_BUILD_SRC_DIR)/$(CMARK_LIB).so
+CMARK_SPECS_RUNNER=spec_tests.py
 CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
 
 NIF_SRC=$(SRC_DIR)/$(CMARK)_nif.c
@@ -78,7 +79,7 @@ $(CMARK):
 	@mix deps.get
 	@mix compile
 
-spec: all spec-dump spec-reference
+spec: all spec-dump
 	@mix deps.get
 	@mix test
 
@@ -88,7 +89,7 @@ spec-reference: $(CMARK_SO)
 test: spec
 
 spec-dump: clean-$(CMARK_SPECS_JSON)
-	@python $(CMARK_SRC_DIR)/runtests.py \
+	@python $(CMARK_SRC_DIR)/$(CMARK_SPECS_RUNNER) \
 		--spec $(CMARK_SRC_DIR)/spec.txt \
 		--dump-tests > $(CMARK_SPECS_JSON) \
 	|| true

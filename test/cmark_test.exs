@@ -8,7 +8,7 @@ defmodule CmarkTest do
         start_line: start_line, end_line: end_line
       } <- @cmark_specs do
     test "Section: »#{section}«, Example: #{example}, Lines: #{start_line}-#{end_line}" do
-      real_markdown = unquote(markdown) |> String.replace("→", "\t")
+      real_markdown = unquote(markdown)
       actual_html   = Cmark.to_html(real_markdown)
       expected_html = unquote(html)
       error_message = """
