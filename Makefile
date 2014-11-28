@@ -47,13 +47,7 @@ check-cmake:
 	echo 'Maybe you need to install it first.' && \
 	exit 1)
 
-check-re2c:
-	@hash re2c 2>/dev/null || ( \
-	echo '`re2c` seems not to be installed or in your PATH.' && \
-	echo 'Maybe you need to install it first.' && \
-	exit 1)
-
-prerequisites: check-make check-cmake check-re2c
+prerequisites: check-make check-cmake
 
 update-deps:
 	git submodule update --init
@@ -101,4 +95,4 @@ clean:
 clean-$(CMARK_SPECS_JSON):
 	@rm -f $(CMARK_SPECS_JSON)
 
-.PHONY: all check-cmake check-make check-re2c clean clean-$(CMARK_SPECS_JSON) prerequisites spec spec-dump spec-reference test update-deps $(CMARK)
+.PHONY: all check-cmake check-make clean clean-$(CMARK_SPECS_JSON) prerequisites spec spec-dump spec-reference test update-deps $(CMARK)
