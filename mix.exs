@@ -25,7 +25,7 @@ defmodule Cmark.Mixfile do
   def project do
     [
       app:          :cmark,
-      version:      "0.3.0",
+      version:      "0.3.0-dev1",
       elixir:       "~> 1.0.1",
       compilers:    [:cmark, :elixir, :app],
       deps:         deps,
@@ -52,7 +52,16 @@ defmodule Cmark.Mixfile do
       files: [
         "lib",
         "src",
-        "c_src",
+        "c_src/CMakeLists.txt",
+        "c_src/Makefile",
+        "c_src/*.*make",
+        "c_src/nmake.bat",
+        "c_src/api_test",
+        "c_src/data",
+        "c_src/src",
+        "c_src/*.{txt,py}",
+        "c_src/README.md",
+        "c_src/LICENSE",
         "Makefile",
         "mix.exs",
         "README.md",
@@ -63,8 +72,8 @@ defmodule Cmark.Mixfile do
 
   defp deps do
     [
-      { :ex_doc,  "~> 0.6" },
-      { :earmark, "~> 0.1" },
+      { :ex_doc,  "~> 0.6", only: :docs },
+      { :earmark, "~> 0.1", only: :docs },
       { :poison,  "~> 1.2", only: :test }
     ]
   end
