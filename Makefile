@@ -19,12 +19,13 @@ CMARK_SRC_DIR=c_src
 CMARK_C_SRC_DIR=$(CMARK_SRC_DIR)/$(SRC_DIR)
 CMARK_BUILD_DIR=$(CMARK_SRC_DIR)/build
 CMARK_BUILD_SRC_DIR=$(CMARK_BUILD_DIR)/$(SRC_DIR)
+CMARK_TEST_DIR=$(CMARK_SRC_DIR)/test
 
 CMARK=cmark
 CMARK_LIB=lib$(CMARK)
 CMARK_LIB_DIR=$(shell find . -type d -name "$(CMARK_LIB)*")
 CMARK_SO=$(CMARK_BUILD_SRC_DIR)/$(CMARK_LIB).so
-CMARK_SPECS_RUNNER=spec_tests.py
+CMARK_SPECS_RUNNER=test/spec_tests.py
 CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
 
 NIF_SRC=$(SRC_DIR)/$(CMARK)_nif.c
@@ -35,10 +36,11 @@ CFLAGS?=-g -O3 $(OPTFLAGS)
 
 all: prerequisites $(NIF_LIB)
 
-check-make:
-	@hash make 2>/dev/null || ( \
-	echo '`make` seems not to be installed or in your PATH.' && \
-	echo 'Maybe you need to install it first.' && \
+check-cc:
+	@hash clang 2>/dev/null || \
+	hash gcc 2>/dev/null || ( \
+	echo '`clang` or `gcc` seem not to be installed or in your PATH.' && \
+	echo 'Maybe you need to install one of it first.' && \
 	exit 1)
 
 check-cmake:
@@ -47,7 +49,7 @@ check-cmake:
 	echo 'Maybe you need to install it first.' && \
 	exit 1)
 
-prerequisites: check-make check-cmake
+prerequisites: check-cc check-cmake
 
 update-deps:
 	git submodule update --init
@@ -57,7 +59,7 @@ $(CMARK_SO):
 	mkdir -p $(CMARK_BUILD_DIR) && \
 		cd $(CMARK_BUILD_DIR) && \
 		cmake .. && \
-		$(MAKE)
+		$(MAKE) $(CMARK_LIB)
 
 $(PRIV_DIR):
 	@mkdir -p $@ $(NOOUT)
@@ -90,9 +92,9 @@ spec-dump: clean-$(CMARK_SPECS_JSON)
 
 clean:
 	cd $(CMARK_SRC_DIR) && $(MAKE) clean
-	rm -rf $(CMARK_BUILD_DIR) $(PRIV_DIR) $(BUILD_DIR) $(CMARK_SPECS_JSON)
+	rm -rf $(CMARK_BUILD_DIR) $(PRIV_DIR) $(BUILD_DIR) $(CMARK_SPECS_JSON) $(CMARK_TEST_DIR)/*.pyc
 
 clean-$(CMARK_SPECS_JSON):
 	@rm -f $(CMARK_SPECS_JSON)
 
-.PHONY: all check-cmake check-make clean clean-$(CMARK_SPECS_JSON) prerequisites spec spec-dump spec-reference test update-deps $(CMARK)
+.PHONY: all check-cc check-cmake clean clean-$(CMARK_SPECS_JSON) prerequisites spec spec-dump spec-reference test update-deps $(CMARK)
