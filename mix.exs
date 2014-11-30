@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Compile.Cmark do
     if Mix.shell.cmd("make") != 0 do
       raise Mix.Error, message: """
         Could not run `make`.
-        Please check if `make`, `cmake` and `re2c` are installed.
+        Please check if `clang`/`gcc` and `cmake` are installed.
       """
     end
   end
@@ -21,11 +21,12 @@ end
 
 defmodule Cmark.Mixfile do
   use Mix.Project
+  @version File.read!("VERSION") |> String.strip
 
   def project do
     [
       app:          :cmark,
-      version:      "0.3.0",
+      version:      @version,
       elixir:       "~> 1.0",
       compilers:    [:cmark, :elixir, :app],
       deps:         deps,
@@ -50,22 +51,21 @@ defmodule Cmark.Mixfile do
         "Docs"   => "http://hexdocs.pm/cmark/"
       },
       files: [
-        "lib",
-        "src",
-        "c_src/CMakeLists.txt",
-        "c_src/Makefile",
         "c_src/*.*make",
-        "c_src/nmake.bat",
-        "c_src/api_test",
+        "c_src/CMakeLists.txt",
         "c_src/data",
-        "c_src/src",
-        "c_src/*.{txt,py}",
-        "c_src/README.md",
         "c_src/LICENSE",
+        "c_src/Makefile",
+        "c_src/nmake.bat",
+        "c_src/README.md",
+        "c_src/src",
+        "lib",
+        "LICENSE",
         "Makefile",
         "mix.exs",
         "README.md",
-        "LICENSE"
+        "src",
+        "VERSION"
       ]
     ]
   end

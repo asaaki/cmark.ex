@@ -34,7 +34,7 @@ NIF_LIB=$(PRIV_DIR)/$(CMARK).so
 OPTFLAGS?=-fPIC
 CFLAGS?=-g -O3 $(OPTFLAGS)
 
-all: prerequisites $(NIF_LIB)
+all: version prerequisites $(NIF_LIB)
 
 check-cc:
 	@hash clang 2>/dev/null || \
@@ -89,6 +89,19 @@ spec-dump: clean-$(CMARK_SPECS_JSON)
 		--spec $(CMARK_SRC_DIR)/spec.txt \
 		--dump-tests > $(CMARK_SPECS_JSON) \
 	|| true
+
+publish: version publish-code publish-docs
+
+publish-code:
+	@mix hex.publish
+
+publish-docs:
+	@MIX_ENV=docs mix hex.docs
+
+version:
+	@echo "+==============+"
+	@echo "| Cmark v`cat VERSION` |"
+	@echo "+==============+"
 
 clean:
 	cd $(CMARK_SRC_DIR) && $(MAKE) clean
