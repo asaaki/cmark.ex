@@ -99,7 +99,7 @@ spec-dump: clean-$(CMARK_SPECS_JSON)
 
 publish: version publish-code publish-docs
 
-publish-code:
+publish-code: all
 	@mix hex.publish
 
 publish-docs:
