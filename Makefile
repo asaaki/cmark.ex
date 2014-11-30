@@ -55,11 +55,18 @@ update-deps:
 	git submodule update --init
 	cd $(CMARK_SRC_DIR) && git checkout master && git pull
 
-$(CMARK_SO):
+$(CMARK_SO): $(CMARK)-fix-cmake
 	mkdir -p $(CMARK_BUILD_DIR) && \
 		cd $(CMARK_BUILD_DIR) && \
 		cmake .. && \
 		$(MAKE) $(CMARK_LIB)
+
+$(CMARK)-fix-cmake:
+	cd $(CMARK_SRC_DIR) && \
+		mv CMakeLists.txt CMakeLists.txt.orig && \
+		sed "/add_subdirectory(api_test)/d; /add_subdirectory(man)/d" \
+			CMakeLists.txt.orig > CMakeLists.txt && \
+		rm CMakeLists.txt.orig
 
 $(PRIV_DIR):
 	@mkdir -p $@ $(NOOUT)
@@ -104,8 +111,8 @@ version:
 	@echo "+==============+"
 
 clean:
-	cd $(CMARK_SRC_DIR) && $(MAKE) clean
-	rm -rf $(CMARK_BUILD_DIR) $(PRIV_DIR) $(BUILD_DIR) $(CMARK_SPECS_JSON) $(CMARK_TEST_DIR)/*.pyc
+	cd $(CMARK_SRC_DIR) && $(MAKE) clean && git clean -d -f -x && git reset --hard
+	rm -rf $(CMARK_BUILD_DIR) $(PRIV_DIR) $(BUILD_DIR) $(CMARK_SPECS_JSON)
 
 clean-$(CMARK_SPECS_JSON):
 	@rm -f $(CMARK_SPECS_JSON)

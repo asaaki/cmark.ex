@@ -59,6 +59,7 @@ defmodule Cmark.Mixfile do
         "c_src/nmake.bat",
         "c_src/README.md",
         "c_src/src",
+        "c_src/test",
         "lib",
         "LICENSE",
         "Makefile",
