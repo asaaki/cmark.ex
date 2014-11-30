@@ -21,3 +21,6 @@ erl_crash.dump
 *.so
 *.so.*
 *.dylib
+
+# Others
+*.pyc
