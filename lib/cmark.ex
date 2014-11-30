@@ -1,58 +1,65 @@
 defmodule Cmark do
   @moduledoc """
-    Compiles Markdown formatted text into HTML
+  Compiles Markdown formatted text into HTML
+
+  Provides:
+
+  * `to_html/1`
+  * `to_html/2`
+  * `to_html_each/2`
+
   """
 
   @doc """
-    Compiles one or more (list) Markdown documents to HTML and returns result
+  Compiles one or more (list) Markdown documents to HTML and returns result
 
-    ## Examples
+  ## Examples
 
-    iex> Cmark.to_html "test"
-    "<p>test</p>\n"
+      iex> "test" |> Cmark.to_html
+      "<p>test</p>\\n"
 
-    iex> Cmark.to_html ["# also works", "* with list", "`of documents`"]
-    ["<h1>also works</h1>\n", "<ul>\n<li>with list</li>\n</ul>\n", "<p><code>of documents</code></p>\n"]
+      iex> ["# also works", "* with list", "`of documents`"] |> Cmark.to_html
+      ["<h1>also works</h1>\\n",
+      "<ul>\\n<li>with list</li>\\n</ul>\\n",
+      "<p><code>of documents</code></p>\\n"]
+
   """
-  def to_html(input) when is_list(input) do
-    parse_doc_list input
-  end
-  def to_html(input) when is_bitstring(input) do
-    parse_doc(input)
-  end
+  def to_html(data) when is_list(data),      do: parse_doc_list(data)
+  def to_html(data) when is_bitstring(data), do: parse_doc(data)
 
   @doc """
-    Compiles one or more (list) Markdown documents to HTML and calls function with result
+  Compiles one or more (list) Markdown documents to HTML and calls function with result
 
-    ## Examples
+  ## Examples
 
-    iex> Cmark.to_html "test", fn (html) -> IO.write("HTML: #{html}") end
-    HTML: <p>test</p>
-    :ok
+      iex> callback = fn (html) -> IO.write("HTML: \#{html}") end
+      iex> "test" |> Cmark.to_html(callback)
+      HTML: <p>test</p>
+      :ok
 
-    iex> Cmark.to_html ["list", "test"], fn (htmls) -> IO.write("HTML: #{inspect htmls}\n") end
-    HTML: ["<p>list</p>\n", "<p>test</p>\n"]
-    :ok
+      iex> callback = fn (htmls) -> IO.write("HTML: \#{inspect htmls}\\n") end
+      iex> ["list", "test"] |> Cmark.to_html(callback)
+      HTML: ["<p>list</p>\\n", "<p>test</p>\\n"]
+      :ok
+
   """
-  def to_html(input, callback) when is_list(input) do
-    parse_doc_list input, callback
-  end
-  def to_html(input, callback) when is_bitstring(input) do
-    parse_doc input, callback
-  end
+  def to_html(data, callback) when is_list(data),      do: parse_doc_list(data, callback)
+  def to_html(data, callback) when is_bitstring(data), do: parse_doc(data, callback)
 
   @doc """
-    Compiles a list of Markdown documents and calls function for each item
+  Compiles a list of Markdown documents and calls function for each item
 
-    ## Examples
+  ## Examples
 
-    iex> Cmark.to_html_each ["list", "test"], fn (html) -> IO.write("HTML: #{html}") end
-    HTML: <p>list</p>
-    HTML: <p>test</p>
-    [:ok, :ok]
+      iex> callback = fn (html) -> IO.write("HTML: \#{html}") end
+      iex> ["list", "test"] |> Cmark.to_html_each(callback)
+      HTML: <p>list</p>
+      HTML: <p>test</p>
+      [:ok, :ok]
+
   """
-  def to_html_each(input, callback) when is_list(input) do
-    parse_doc_list_each input, callback
+  def to_html_each(data, callback) when is_list(data) do
+    parse_doc_list_each(data, callback)
   end
 
   defp parse_doc_list(documents) do
