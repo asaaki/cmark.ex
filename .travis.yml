@@ -4,16 +4,7 @@ otp_release:
   - 17.3
   - 17.1
 
-branches:
-  only:
-    - master
-
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install clang cmake re2c
-  - export CC=clang
-  - wget https://github.com/elixir-lang/elixir/releases/download/v1.0.2/Precompiled.zip
-  - unzip -d elixir Precompiled.zip
+sudo: false
 
 before_script:
   - export PATH=`pwd`/elixir/bin:$PATH
@@ -21,3 +12,18 @@ before_script:
 
 script:
   - make spec
+
+before_install:
+  - wget http://s3.hex.pm/builds/elixir/v1.0.2.zip
+  - unzip -d elixir v1.0.2.zip
+
+before_script:
+  - export PATH=`pwd`/elixir/bin:$PATH
+  - mix local.hex --force
+  - mix deps.get --only test
+
+script: mix test
+
+after_script:
+  - mix deps.get --only docs
+  - MIX_ENV=docs mix inch.report

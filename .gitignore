@@ -1,26 +1,16 @@
-# Elixir/Erlang/Project
+*.a
+*.dll
+*.dylib
+*.elf
+*.ez
+*.ko
+*.lib
+*.o
+*.obj
+*.pyc
+*.so
+*.so.*
 /_build
 /deps
 /docs
-/test/cmark_specs.json
 erl_crash.dump
-*.ez
-
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
-
-# Libraries
-*.lib
-*.a
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Others
-*.pyc
