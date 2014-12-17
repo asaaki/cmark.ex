@@ -6,6 +6,11 @@ otp_release:
 
 sudo: false
 
+env:
+  matrix:
+    - "COMPILER=gcc"
+    - "COMPILER=clang"
+
 before_script:
   - export PATH=`pwd`/elixir/bin:$PATH
   - mix local.hex --force
@@ -23,9 +28,7 @@ before_script:
   - mix deps.get --only test
 
 script:
-  - CC=clang make
-  - ls -ahlF priv
-  - mix test
+  - CC=$COMPILER make test
 
 after_script:
   - mix deps.get --only docs
