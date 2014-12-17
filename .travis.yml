@@ -10,7 +10,7 @@ env:
   matrix:
     - CC=clang
     - CC=gcc
-    - CC=$CC
+    - NO_CC=true
 
 before_install:
   - wget http://s3.hex.pm/builds/elixir/v1.0.2.zip
