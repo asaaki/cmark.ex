@@ -32,7 +32,8 @@ endif
 INCLUDES=-I$(C_SRC_DIR)
 
 OPTFLAGS?=-fPIC
-CFLAGS?=-g -O2 $(OPTFLAGS) $(OPTIONS) $(INCLUDES)
+CFLAGS=-O2 $(OPTFLAGS) $(INCLUDES)
+CMARK_OPTFLAGS=-DNDEBUG
 
 ### TARGETS
 
@@ -41,7 +42,7 @@ all: version check-cc $(NIF_LIB)
 build-objects: $(C_SRC_O_FILES)
 
 $(C_SRC_DIR)/%.o : $(C_SRC_DIR)/%.c
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CMARK_OPTFLAGS) $(CFLAGS) -o $@ -c $<
 
 $(C_SRC_DIR):
 	mkdir -p $@
