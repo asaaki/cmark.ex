@@ -9,7 +9,6 @@ sudo: false
 before_script:
   - export PATH=`pwd`/elixir/bin:$PATH
   - mix local.hex --force
-  - export CC=clang
 
 script:
   - make spec
@@ -23,7 +22,10 @@ before_script:
   - mix local.hex --force
   - mix deps.get --only test
 
-script: mix test
+script:
+  - CC=clang make
+  - ls -ahlF priv
+  - mix test
 
 after_script:
   - mix deps.get --only docs
