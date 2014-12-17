@@ -9,11 +9,10 @@
 #include "cmark.h"
 
 static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
-
   ErlNifBinary  markdown_binary;
   ErlNifBinary  output_binary;
-  char *html;
-  size_t html_len;
+  char         *html;
+  size_t        html_len;
 
   if (argc != 1) {
     return enif_make_badarg(env);
@@ -39,7 +38,7 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
   strncpy((char*)output_binary.data, html, html_len);
 
   return enif_make_binary(env, &output_binary);
-}
+};
 
 static ErlNifFunc nif_funcs[] = {
   { "to_html", 1, to_html_nif }
