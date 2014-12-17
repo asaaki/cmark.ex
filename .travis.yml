@@ -8,15 +8,8 @@ sudo: false
 
 env:
   matrix:
-    - "COMPILER=gcc"
-    - "COMPILER=clang"
-
-before_script:
-  - export PATH=`pwd`/elixir/bin:$PATH
-  - mix local.hex --force
-
-script:
-  - make spec
+    - "CC=gcc"
+    - "CC=clang"
 
 before_install:
   - wget http://s3.hex.pm/builds/elixir/v1.0.2.zip
@@ -27,8 +20,7 @@ before_script:
   - mix local.hex --force
   - mix deps.get --only test
 
-script:
-  - CC=$COMPILER make test
+script: mix test
 
 after_script:
   - mix deps.get --only docs
