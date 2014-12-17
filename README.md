@@ -18,7 +18,7 @@ If you want to run the specs, also `python` needs to be installed.
 ### mix.exs
 
 ```elixir
-{ :cmark, "~> 0.3" }
+{ :cmark, "~> 0.4" }
 ```
 
 ## Usage
