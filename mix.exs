@@ -51,15 +51,7 @@ defmodule Cmark.Mixfile do
         "Docs"   => "http://hexdocs.pm/cmark/"
       },
       files: [
-        "c_src/*.*make",
-        "c_src/CMakeLists.txt",
-        "c_src/data",
-        "c_src/LICENSE",
-        "c_src/Makefile",
-        "c_src/nmake.bat",
-        "c_src/README.md",
-        "c_src/src",
-        "c_src/test",
+        "c_src",
         "lib",
         "LICENSE",
         "Makefile",
