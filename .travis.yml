@@ -1,5 +1,4 @@
 language: erlang
-compiler: clang
 
 otp_release:
   - 17.3
@@ -10,6 +9,7 @@ sudo: false
 before_script:
   - export PATH=`pwd`/elixir/bin:$PATH
   - mix local.hex --force
+  - export CC=clang
 
 script:
   - make spec
