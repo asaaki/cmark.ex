@@ -1,4 +1,5 @@
 language: erlang
+compiler: clang
 
 otp_release:
   - 17.3
