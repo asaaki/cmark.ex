@@ -11,9 +11,7 @@ Elixir NIF for [libcmark](https://github.com/jgm/CommonMark), a parser library f
 
 ### Prerequisites
 
-You need `make` (mostly present) and `cmake` (maybe not present, please install first).
-
-If you want to run the specs, also `python` needs to be installed.
+You need a C compiler like `gcc` or `clang`.
 
 ### mix.exs
 
