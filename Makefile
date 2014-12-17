@@ -6,6 +6,7 @@ EBIN_DIR?=ebin
 NOOUT=2>&1 >/dev/null
 
 BUILD_DIR=_build
+DEPS_DIR=deps
 PRIV_DIR=priv
 SRC_DIR=src
 TEST_DIR=test
@@ -98,7 +99,7 @@ clean-objects:
 	rm -f $(C_SRC_O_FILES)
 
 clean-dirs:
-	rm -rf $(PRIV_DIR) $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) $(DEPS_DIR) $(PRIV_DIR)
 
 ### DEVELOPMENT
 
@@ -116,6 +117,7 @@ dev-copy-code: $(C_SRC_DIR) dev-prebuilt-lib
 	cp $(CMARK_C_SRC_DIR)/*.inc $(C_SRC_DIR)/
 	cp $(CMARK_SRC_DIR)/build/src/config.h $(C_SRC_DIR)/
 	cp $(CMARK_SRC_DIR)/build/src/cmark_export.h $(C_SRC_DIR)/
+	rm -f $(C_SRC_DIR)/main.*
 
 dev-prebuilt-lib: dev-update-deps dev-clean-deps
 	mkdir -p $(CMARK_BUILD_DIR) && cd $(CMARK_BUILD_DIR) && cmake .. && $(MAKE)
