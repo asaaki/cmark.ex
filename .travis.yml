@@ -3,7 +3,7 @@ sudo: false
 language: erlang
 
 otp_release:
-  - 17.3
+  - 17.3.4
   - 17.1
 
 env:
