@@ -22,7 +22,7 @@ CMARK_SPECS_RUNNER=test/spec_tests.py
 CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
 
 C_SRC_DIR=c_src
-C_SRC_C_FILES=$(sort $(wildcard $(C_SRC_DIR/)/*.c))
+C_SRC_C_FILES=$(sort $(wildcard $(C_SRC_DIR)/*.c))
 C_SRC_O_FILES=$(C_SRC_C_FILES:.c=.o)
 
 NIF_SRC=$(SRC_DIR)/$(CMARK)_nif.c
