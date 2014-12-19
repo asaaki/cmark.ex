@@ -14,13 +14,16 @@ TEST_DIR=test
 CMARK=cmark
 CMARK_SRC_DIR=src_$(CMARK)
 CMARK_C_SRC_DIR=$(CMARK_SRC_DIR)/$(SRC_DIR)
+CMARK_C_FILES=$(sort $(filter-out %main.c, $(wildcard $(CMARK_C_SRC_DIR)/*.c)))
+CMARK_H_FILES=$(sort $(wildcard $(CMARK_C_SRC_DIR)/*.h))
+CMARK_INC_FILES=$(sort $(wildcard $(CMARK_C_SRC_DIR)/*.inc))
 CMARK_BUILD_DIR=$(CMARK_SRC_DIR)/build
 CMARK_SPECS_RUNNER=test/spec_tests.py
 CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
 
 C_SRC_DIR=c_src
-C_SRC_C_FILES=$(shell find $(C_SRC_DIR) -name "*.c")
-C_SRC_O_FILES=$(shell echo $(C_SRC_C_FILES) | sed "s/\.c/\.o/g")
+C_SRC_C_FILES=$(sort $(wildcard $(C_SRC_DIR/)/*.c))
+C_SRC_O_FILES=$(C_SRC_C_FILES:.c=.o)
 
 NIF_SRC=$(SRC_DIR)/$(CMARK)_nif.c
 NIF_LIB=$(PRIV_DIR)/$(CMARK).so
@@ -31,7 +34,7 @@ OPTIONS+= -dynamiclib -undefined dynamic_lookup
 endif
 INCLUDES=-I$(C_SRC_DIR)
 
-OPTFLAGS?=-fPIC
+OPTFLAGS?=-fPIC -std=c99 -Wall
 CFLAGS=-O2 $(OPTFLAGS) $(INCLUDES)
 CMARK_OPTFLAGS=-DNDEBUG
 
@@ -104,7 +107,7 @@ clean-dirs:
 
 ### DEVELOPMENT
 
-dev-prepare: dev-copy-code dev-spec-dump
+dev-prepare: dev-prebuilt-lib dev-copy-code dev-spec-dump
 
 $(CMARK_SRC_DIR):
 	git submodule update --init --force --recursive
@@ -112,13 +115,14 @@ $(CMARK_SRC_DIR):
 dev-update-deps: $(CMARK_SRC_DIR)
 	git submodule foreach "git clean -x -f -d && git checkout master && git pull"
 
-dev-copy-code: $(C_SRC_DIR) dev-prebuilt-lib
-	cp $(CMARK_C_SRC_DIR)/*.c $(C_SRC_DIR)/
-	cp $(CMARK_C_SRC_DIR)/*.h $(C_SRC_DIR)/
-	cp $(CMARK_C_SRC_DIR)/*.inc $(C_SRC_DIR)/
-	cp $(CMARK_SRC_DIR)/build/src/config.h $(C_SRC_DIR)/
-	cp $(CMARK_SRC_DIR)/build/src/cmark_export.h $(C_SRC_DIR)/
-	rm -f $(C_SRC_DIR)/main.*
+dev-copy-code: $(C_SRC_DIR)
+	cp \
+		$(CMARK_C_FILES) \
+		$(CMARK_H_FILES) \
+		$(CMARK_INC_FILES) \
+		$(CMARK_BUILD_DIR)/src/config.h \
+		$(CMARK_BUILD_DIR)/src/cmark_export.h \
+	$(C_SRC_DIR)/
 
 dev-prebuilt-lib: dev-update-deps dev-clean-deps
 	mkdir -p $(CMARK_BUILD_DIR) && cd $(CMARK_BUILD_DIR) && cmake .. && $(MAKE)
@@ -137,6 +141,5 @@ dev-spec-dump: $(CMARK_SRC_DIR)
 	|| true
 
 ### PHONY
-
 
 .PHONY: all check-cc clean dev-build-objects dev-clean-deps dev-copy-code dev-prebuilt-lib dev-prepare dev-spec-dump dev-update-deps spec test $(CMARK)
