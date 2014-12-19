@@ -32,15 +32,15 @@ defmodule Cmark do
 
   ## Examples
 
-      iex> callback = fn (html) -> IO.write("HTML: \#{html}") end
+      iex> callback = fn (html) -> "HTML is \#{html}" |> String.strip end
       iex> "test" |> Cmark.to_html(callback)
-      HTML: <p>test</p>
-      :ok
+      "HTML is <p>test</p>"
 
-      iex> callback = fn (htmls) -> IO.write("HTML: \#{inspect htmls}\\n") end
+      iex> callback = fn (htmls) ->
+      iex>   Enum.map(htmls, &String.strip/1) |> Enum.join("<hr>")
+      iex> end
       iex> ["list", "test"] |> Cmark.to_html(callback)
-      HTML: ["<p>list</p>\\n", "<p>test</p>\\n"]
-      :ok
+      "<p>list</p><hr><p>test</p>"
 
   """
   def to_html(data, callback) when is_list(data),      do: parse_doc_list(data, callback)
@@ -51,11 +51,9 @@ defmodule Cmark do
 
   ## Examples
 
-      iex> callback = fn (html) -> IO.write("HTML: \#{html}") end
+      iex> callback = fn (html) -> "HTML is \#{html |> String.strip}" end
       iex> ["list", "test"] |> Cmark.to_html_each(callback)
-      HTML: <p>list</p>
-      HTML: <p>test</p>
-      [:ok, :ok]
+      ["HTML is <p>list</p>", "HTML is <p>test</p>"]
 
   """
   def to_html_each(data, callback) when is_list(data) do
