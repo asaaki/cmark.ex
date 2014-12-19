@@ -55,6 +55,7 @@ defmodule Cmark.Mixfile do
         "c_src/*.c",
         "c_src/*.h",
         "c_src/*.inc",
+        "c_src/LICENSE",
         "lib",
         "LICENSE",
         "Makefile",

@@ -122,6 +122,7 @@ dev-copy-code: $(C_SRC_DIR)
 		$(CMARK_INC_FILES) \
 		$(CMARK_BUILD_DIR)/src/config.h \
 		$(CMARK_BUILD_DIR)/src/cmark_export.h \
+		$(CMARK_SRC_DIR)/LICENSE \
 	$(C_SRC_DIR)/
 
 dev-prebuilt-lib: dev-update-deps dev-clean-deps
