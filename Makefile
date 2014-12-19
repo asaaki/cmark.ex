@@ -70,12 +70,12 @@ test: spec
 
 ### PUBLISH
 
-publish: version publish-code publish-docs
+publish: version docs publish-code publish-docs
 
 publish-code: all
 	@mix hex.publish
 
-publish-docs:
+publish-docs: docs
 	@MIX_ENV=docs mix hex.docs
 
 ### HELPERS/TOOLS
@@ -86,6 +86,9 @@ check-cc:
 	echo '`clang` or `gcc` seem not to be installed or in your PATH.' && \
 	echo 'Maybe you need to install one of it first.' && \
 	exit 1)
+
+docs:
+	@MIX_ENV=docs mix docs
 
 version:
 	@echo "+==============+"
@@ -143,4 +146,4 @@ dev-spec-dump: $(CMARK_SRC_DIR)
 
 ### PHONY
 
-.PHONY: all check-cc clean dev-build-objects dev-clean-deps dev-copy-code dev-prebuilt-lib dev-prepare dev-spec-dump dev-update-deps spec test $(CMARK)
+.PHONY: all check-cc clean dev-build-objects dev-clean-deps dev-copy-code dev-prebuilt-lib dev-prepare dev-spec-dump dev-update-deps docs spec test $(CMARK)
