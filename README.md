@@ -22,11 +22,52 @@ You need a C compiler like `gcc` or `clang`.
 
 ## Usage
 
+### Quick example
+
 ```elixir
 Cmark.to_html "a markdown string"
 #=> "<p>a markdown string</p>\n"
 ```
 
-## License
+### `Cmark.to_html/1`
 
-[MIT/X11](./LICENSE)
+```elixir
+"test" |> Cmark.to_html
+#=> "<p>test</p>\n"
+```
+
+```elixir
+["# also works", "* with list", "`of documents`"] |> Cmark.to_html
+#=> ["<h1>also works</h1>\n",
+#    "<ul>\n<li>with list</li>\n</ul>\n",
+#    "<p><code>of documents</code></p>\n"]
+```
+
+### `Cmark.to_html/2`
+
+```elixir
+callback = fn (html) -> "HTML is #{html}" |> String.strip end
+"test" |> Cmark.to_html(callback)
+#=> "HTML is <p>test</p>"
+```
+
+```elixir
+callback = fn (htmls) ->
+ Enum.map(htmls, &String.strip/1) |> Enum.join("<hr>")
+end
+["list", "test"] |> Cmark.to_html(callback)
+#=> "<p>list</p><hr><p>test</p>"
+```
+
+### `Cmark.to_html_each/2`
+
+```elixir
+callback = fn (html) -> "HTML is #{html |> String.strip}" end
+["list", "test"] |> Cmark.to_html_each(callback)
+#=> ["HTML is <p>list</p>", "HTML is <p>test</p>"]
+```
+
+## Licenses
+
+Cmark.ex: [MIT/X11](./LICENSE)
+CommonMark C code: [BSD](./src_cmark/LICENSE)
