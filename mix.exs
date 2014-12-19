@@ -35,7 +35,7 @@ defmodule Cmark.Mixfile do
       name:          "cmark",
       source_url:    "https://github.com/asaaki/cmark.ex",
       homepage_url:  "http://hexdocs.pm/cmark",
-      docs:          [readme: true, main: "README"],
+      docs:          &docs/0,
       test_coverage: [tool: ExCoveralls]
     ]
   end
@@ -67,10 +67,19 @@ defmodule Cmark.Mixfile do
     ]
   end
 
+  defp docs do
+    {ref, 0} = System.cmd("git", ["rev-parse", "--verify", "--quiet", "HEAD"])
+    [
+      source_ref: ref,
+      readme:     "README.md",
+      main:       "README"
+    ]
+  end
+
   defp deps do
     [
       { :excoveralls, "~> 0.3", only: [:dev, :test] },
-      { :poison,      "~> 1.3", only: [:dev, :test] },
+      { :poison,      "~> 1.2", only: [:dev, :test] },
       { :ex_doc,      "~> 0.6", only: :docs },
       { :earmark,     "~> 0.1", only: :docs },
       { :inch_ex,     "~> 0.2", only: :docs }
