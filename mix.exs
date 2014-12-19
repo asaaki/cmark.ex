@@ -25,17 +25,18 @@ defmodule Cmark.Mixfile do
 
   def project do
     [
-      app:          :cmark,
-      version:      @version,
-      elixir:       "~> 1.0",
-      compilers:    [:cmark, :elixir, :app],
-      deps:         deps,
-      package:      package,
-      description:  "Elixir NIF for libcmark, a parser library following the CommonMark spec",
-      name:         "cmark",
-      source_url:   "https://github.com/asaaki/cmark.ex",
-      homepage_url: "http://hexdocs.pm/cmark",
-      docs:         [readme: true, main: "README"]
+      app:           :cmark,
+      version:       @version,
+      elixir:        "~> 1.0",
+      compilers:     [:cmark, :elixir, :app],
+      deps:          deps,
+      package:       package,
+      description:   "Elixir NIF for libcmark, a parser library following the CommonMark spec",
+      name:          "cmark",
+      source_url:    "https://github.com/asaaki/cmark.ex",
+      homepage_url:  "http://hexdocs.pm/cmark",
+      docs:          [readme: true, main: "README"],
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -67,10 +68,11 @@ defmodule Cmark.Mixfile do
 
   defp deps do
     [
-      { :ex_doc,  "~> 0.6", only: :docs },
-      { :earmark, "~> 0.1", only: :docs },
-      { :inch_ex, "~> 0.2", only: :docs },
-      { :poison,  "~> 1.2", only: :test }
+      { :excoveralls, "~> 0.3", only: [:dev, :test] },
+      { :poison,      "~> 1.3", only: [:dev, :test] },
+      { :ex_doc,      "~> 0.6", only: :docs },
+      { :earmark,     "~> 0.1", only: :docs },
+      { :inch_ex,     "~> 0.2", only: :docs }
     ]
   end
 end
