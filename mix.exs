@@ -79,8 +79,8 @@ defmodule Cmark.Mixfile do
   defp deps do
     [
       { :excoveralls, "~> 0.3", only: [:dev, :test] },
-      { :poison,      "~> 1.2", only: [:dev, :test] },
-      { :ex_doc,      "~> 0.6", only: :docs },
+      { :poison,      "~> 1.3", only: [:dev, :test] },
+      { :ex_doc,      "~> 0.7", only: :docs },
       { :earmark,     "~> 0.1", only: :docs },
       { :inch_ex,     "~> 0.2", only: :docs }
     ]
