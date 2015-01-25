@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
 
+#include "cmark_ctype.h"
 #include "config.h"
 #include "node.h"
 #include "parser.h"
@@ -31,6 +31,7 @@ typedef struct delimiter {
 	int position;
 	bool can_open;
 	bool can_close;
+	bool active;
 } delimiter;
 
 typedef struct {
@@ -46,7 +47,7 @@ S_insert_emph(subject *subj, delimiter *opener, delimiter *closer);
 static int parse_inline(subject* subj, cmark_node * parent);
 
 static void subject_from_buf(subject *e, cmark_strbuf *buffer,
-			     cmark_reference_map *refmap);
+                             cmark_reference_map *refmap);
 static int subject_find_special_char(subject *subj);
 
 static unsigned char *cmark_clean_autolink(cmark_chunk *url, int is_email)
@@ -71,11 +72,11 @@ static inline cmark_node *make_link(cmark_node *label, unsigned char *url, unsig
 	if(e != NULL) {
 		e->type = CMARK_NODE_LINK;
 		e->first_child   = label;
-                e->last_child    = label;
+		e->last_child    = label;
 		e->as.link.url   = url;
 		e->as.link.title = title;
 		e->next = NULL;
-                label->parent = e;
+		label->parent = e;
 	}
 	return e;
 }
@@ -93,14 +94,14 @@ static inline cmark_node* make_literal(cmark_node_type t, cmark_chunk s)
 		e->type = t;
 		e->as.literal = s;
 		e->next = NULL;
-                e->prev = NULL;
-                e->parent = NULL;
-                e->first_child = NULL;
-                e->last_child = NULL;
-                // These fields aren't used for inlines:
-                e->start_line = 0;
-                e->start_column = 0;
-                e->end_line = 0;
+		e->prev = NULL;
+		e->parent = NULL;
+		e->first_child = NULL;
+		e->last_child = NULL;
+		// These fields aren't used for inlines:
+		e->start_line = 0;
+		e->start_column = 0;
+		e->end_line = 0;
 	}
 	return e;
 }
@@ -112,14 +113,14 @@ static inline cmark_node* make_simple(cmark_node_type t)
 	if(e != NULL) {
 		e->type = t;
 		e->next = NULL;
-                e->prev = NULL;
-                e->parent = NULL;
-                e->first_child = NULL;
-                e->last_child = NULL;
-                // These fields aren't used for inlines:
-                e->start_line = 0;
-                e->start_column = 0;
-                e->end_line = 0;
+		e->prev = NULL;
+		e->parent = NULL;
+		e->first_child = NULL;
+		e->last_child = NULL;
+		// These fields aren't used for inlines:
+		e->start_line = 0;
+		e->start_column = 0;
+		e->end_line = 0;
 	}
 	return e;
 }
@@ -140,7 +141,7 @@ static unsigned char *bufdup(const unsigned char *buf)
 }
 
 static void subject_from_buf(subject *e, cmark_strbuf *buffer,
-			     cmark_reference_map *refmap)
+                             cmark_reference_map *refmap)
 {
 	e->input.data = buffer->ptr;
 	e->input.len = buffer->size;
@@ -211,7 +212,7 @@ static int scan_to_closing_backticks(subject* subj, int openticklength)
 		advance(subj);
 		numticks++;
 	}
-	if (numticks != openticklength){
+	if (numticks != openticklength) {
 		return(scan_to_closing_backticks(subj, openticklength));
 	}
 	return (subj->pos);
@@ -249,6 +250,7 @@ scan_delims(subject* subj, unsigned char c, bool * can_open, bool * can_close)
 	int32_t after_char = 0;
 	int32_t before_char = 0;
 	int len;
+	bool left_flanking, right_flanking;
 
 	if (subj->pos == 0) {
 		before_char = 10;
@@ -260,8 +262,8 @@ scan_delims(subject* subj, unsigned char c, bool * can_open, bool * can_close)
 			before_char_pos -= 1;
 		}
 		len = utf8proc_iterate(subj->input.data + before_char_pos,
-				 subj->pos - before_char_pos, &before_char);
-		if (len == 0) {
+		                       subj->pos - before_char_pos, &before_char);
+		if (len == -1) {
 			before_char = 10;
 		}
 	}
@@ -272,17 +274,24 @@ scan_delims(subject* subj, unsigned char c, bool * can_open, bool * can_close)
 	}
 
 	len = utf8proc_iterate(subj->input.data + subj->pos,
-			 subj->input.len - subj->pos, &after_char);
-	if (len == 0) {
+	                       subj->input.len - subj->pos, &after_char);
+	if (len == -1) {
 		after_char = 10;
 	}
-	*can_open = numdelims > 0 && !utf8proc_is_space(after_char);
-	*can_close = numdelims > 0 && !utf8proc_is_space(before_char);
+	left_flanking = numdelims > 0 && !utf8proc_is_space(after_char) &&
+	            !(utf8proc_is_punctuation(after_char) &&
+	              !utf8proc_is_space(before_char) &&
+	              !utf8proc_is_punctuation(before_char));
+	right_flanking = numdelims > 0 && !utf8proc_is_space(before_char) &&
+	             !(utf8proc_is_punctuation(before_char) &&
+	               !utf8proc_is_space(after_char) &&
+	               !utf8proc_is_punctuation(after_char));
 	if (c == '_') {
-		*can_open = *can_open &&
-			!(before_char < 128 && isalnum((char)before_char));
-		*can_close = *can_close &&
-			!(before_char < 128 && isalnum((char)after_char));
+		*can_open = left_flanking && !right_flanking;
+		*can_close = right_flanking && !left_flanking;
+	} else {
+		*can_open = left_flanking;
+		*can_close = right_flanking;
 	}
 	return numdelims;
 }
@@ -319,10 +328,10 @@ static void remove_delimiter(subject *subj, delimiter *delim)
 }
 
 static void push_delimiter(subject *subj, unsigned char c, bool can_open,
-			   bool can_close, cmark_node *inl_text)
+                           bool can_close, cmark_node *inl_text)
 {
 	delimiter *delim =
-		(delimiter*)malloc(sizeof(delimiter));
+	    (delimiter*)malloc(sizeof(delimiter));
 	if (delim == NULL) {
 		return;
 	}
@@ -336,6 +345,7 @@ static void push_delimiter(subject *subj, unsigned char c, bool can_open,
 		delim->previous->next = delim;
 	}
 	delim->position = subj->pos;
+	delim->active = true;
 	subj->last_delim = delim;
 }
 
@@ -410,7 +420,7 @@ S_insert_emph(subject *subj, delimiter *opener, delimiter *closer)
 	// calculate the actual number of characters used from this closer
 	if (closer_num_chars < 3 || opener_num_chars < 3) {
 		use_delims = closer_num_chars <= opener_num_chars ?
-			closer_num_chars : opener_num_chars;
+		             closer_num_chars : opener_num_chars;
 	} else { // closer and opener both have >= 3 characters
 		use_delims = closer_num_chars % 2 == 0 ? 2 : 1;
 	}
@@ -440,8 +450,7 @@ S_insert_emph(subject *subj, delimiter *opener, delimiter *closer)
 		emph->type = use_delims == 1 ? NODE_EMPH : NODE_STRONG;
 		// remove opener from list
 		remove_delimiter(subj, opener);
-	}
-	else {
+	} else {
 		// create new emph or strong, and splice it in to our inlines
 		// between the opener and closer
 		emph = use_delims == 1 ? make_emph() : make_strong();
@@ -481,7 +490,7 @@ static cmark_node* handle_backslash(subject *subj)
 {
 	advance(subj);
 	unsigned char nextchar = peek_char(subj);
-	if (ispunct(nextchar)) {  // only ascii symbols and newline can be escaped
+	if (cmark_ispunct(nextchar)) {  // only ascii symbols and newline can be escaped
 		advance(subj);
 		return make_str(cmark_chunk_dup(&subj->input, subj->pos - 1, 1));
 	} else if (nextchar == '\n') {
@@ -502,9 +511,9 @@ static cmark_node* handle_entity(subject* subj)
 	advance(subj);
 
 	len = houdini_unescape_ent(&ent,
-				   subj->input.data + subj->pos,
-				   subj->input.len - subj->pos
-				   );
+	                           subj->input.data + subj->pos,
+	                           subj->input.len - subj->pos
+	                          );
 
 	if (len == 0)
 		return make_str(cmark_chunk_literal("&"));
@@ -549,26 +558,26 @@ unsigned char *cmark_clean_url(cmark_chunk *url)
 
 unsigned char *cmark_clean_title(cmark_chunk *title)
 {
-       cmark_strbuf buf = GH_BUF_INIT;
-       unsigned char first, last;
+	cmark_strbuf buf = GH_BUF_INIT;
+	unsigned char first, last;
 
-       if (title->len == 0)
-               return NULL;
+	if (title->len == 0)
+		return NULL;
 
-       first = title->data[0];
-       last = title->data[title->len - 1];
+	first = title->data[0];
+	last = title->data[title->len - 1];
 
-       // remove surrounding quotes if any:
-       if ((first == '\'' && last == '\'') ||
-           (first == '(' && last == ')') ||
-           (first == '"' && last == '"')) {
-               houdini_unescape_html_f(&buf, title->data + 1, title->len - 2);
-       } else {
-               houdini_unescape_html_f(&buf, title->data, title->len);
-       }
+	// remove surrounding quotes if any:
+	if ((first == '\'' && last == '\'') ||
+	    (first == '(' && last == ')') ||
+	    (first == '"' && last == '"')) {
+		houdini_unescape_html_f(&buf, title->data + 1, title->len - 2);
+	} else {
+		houdini_unescape_html_f(&buf, title->data, title->len);
+	}
 
-       cmark_strbuf_unescape(&buf);
-       return cmark_strbuf_detach(&buf);
+	cmark_strbuf_unescape(&buf);
+	return cmark_strbuf_detach(&buf);
 }
 
 // Parse an autolink or HTML tag.
@@ -587,9 +596,9 @@ static cmark_node* handle_pointy_brace(subject* subj)
 		subj->pos += matchlen;
 
 		return make_autolink(
-				     make_str_with_entities(&contents),
-				     contents, 0
-				     );
+		           make_str_with_entities(&contents),
+		           contents, 0
+		       );
 	}
 
 	// next try to match an email autolink
@@ -599,9 +608,9 @@ static cmark_node* handle_pointy_brace(subject* subj)
 		subj->pos += matchlen;
 
 		return make_autolink(
-				     make_str_with_entities(&contents),
-				     contents, 1
-				     );
+		           make_str_with_entities(&contents),
+		           contents, 1
+		       );
 	}
 
 	// finally, try to match an html tag
@@ -637,7 +646,7 @@ static int link_label(subject* subj, cmark_chunk *raw_label)
 		if (c == '\\') {
 			advance(subj);
 			length++;
-			if (ispunct(peek_char(subj))) {
+			if (cmark_ispunct(peek_char(subj))) {
 				advance(subj);
 				length++;
 			}
@@ -656,7 +665,7 @@ static int link_label(subject* subj, cmark_chunk *raw_label)
 		return 1;
 	}
 
- noMatch:
+noMatch:
 	subj->pos = startpos; // rewind
 	return 0;
 
@@ -671,10 +680,9 @@ static cmark_node* handle_close_bracket(subject* subj, cmark_node *parent)
 	int sps;
 	cmark_reference *ref;
 	bool is_image = false;
-	cmark_chunk urlcmark_chunk, titlecmark_chunk;
+	cmark_chunk url_chunk, title_chunk;
 	unsigned char *url, *title;
 	delimiter *opener;
-	delimiter *tmp_delim;
 	cmark_node *link_text;
 	cmark_node *inl;
 	cmark_chunk raw_label;
@@ -696,6 +704,12 @@ static cmark_node* handle_close_bracket(subject* subj, cmark_node *parent)
 		return make_str(cmark_chunk_literal("]"));
 	}
 
+	if (!opener->active) {
+		// take delimiter off stack
+		remove_delimiter(subj, opener);
+		return make_str(cmark_chunk_literal("]"));
+	}
+
 	// If we got here, we matched a potential link/image text.
 	is_image = opener->delim_char == '!';
 	link_text = opener->inl_text->next;
@@ -714,19 +728,19 @@ static cmark_node* handle_close_bracket(subject* subj, cmark_node *parent)
 
 		// ensure there are spaces btw url and title
 		endtitle = (starttitle == endurl) ? starttitle :
-			starttitle + scan_link_title(&subj->input, starttitle);
+		           starttitle + scan_link_title(&subj->input, starttitle);
 
 		endall = endtitle + scan_spacechars(&subj->input, endtitle);
 
 		if (peek_at(subj, endall) == ')') {
 			subj->pos = endall + 1;
 
-			urlcmark_chunk = cmark_chunk_dup(&subj->input, starturl, endurl - starturl);
-			titlecmark_chunk = cmark_chunk_dup(&subj->input, starttitle, endtitle - starttitle);
-			url = cmark_clean_url(&urlcmark_chunk);
-			title = cmark_clean_title(&titlecmark_chunk);
-			cmark_chunk_free(&urlcmark_chunk);
-			cmark_chunk_free(&titlecmark_chunk);
+			url_chunk = cmark_chunk_dup(&subj->input, starturl, endurl - starturl);
+			title_chunk = cmark_chunk_dup(&subj->input, starttitle, endtitle - starttitle);
+			url = cmark_clean_url(&url_chunk);
+			title = cmark_clean_title(&title_chunk);
+			cmark_chunk_free(&url_chunk);
+			cmark_chunk_free(&title_chunk);
 			goto match;
 
 		} else {
@@ -742,7 +756,7 @@ static cmark_node* handle_close_bracket(subject* subj, cmark_node *parent)
 	if (!found_label || raw_label.len == 0) {
 		cmark_chunk_free(&raw_label);
 		raw_label = cmark_chunk_dup(&subj->input, opener->position,
-				      initial_pos - opener->position - 1);
+		                            initial_pos - opener->position - 1);
 	}
 
 	if (!found_label) {
@@ -789,17 +803,20 @@ match:
 	parent->last_child = inl;
 
 	// process_emphasis will remove this delimiter and all later ones.
-	// Now, if we have a link, we also want to remove earlier link
-        // delimiters. (This code can be removed if we decide to allow links
+	// Now, if we have a link, we also want to deactivate earlier link
+	// delimiters. (This code can be removed if we decide to allow links
 	// inside links.)
 	if (!is_image) {
 		opener = subj->last_delim;
 		while (opener != NULL) {
-			tmp_delim = opener->previous;
 			if (opener->delim_char == '[') {
-				remove_delimiter(subj, opener);
+				if (!opener->active) {
+					break;
+				} else {
+					opener->active = false;
+				}
 			}
-			opener = tmp_delim;
+			opener = opener->previous;
 		}
 	}
 
@@ -845,7 +862,8 @@ static int subject_find_special_char(subject *subj)
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	};
 
 	int n = subj->pos + 1;
 
@@ -870,7 +888,7 @@ static int parse_inline(subject* subj, cmark_node * parent)
 	if (c == 0) {
 		return 0;
 	}
-	switch(c){
+	switch(c) {
 	case '\n':
 		new_inl = handle_newline(subj);
 		break;
@@ -944,7 +962,7 @@ static void spnl(subject* subj)
 	bool seen_newline = false;
 	while (peek_char(subj) == ' ' ||
 	       (!seen_newline &&
-		(seen_newline = peek_char(subj) == '\n'))) {
+	        (seen_newline = peek_char(subj) == '\n'))) {
 		advance(subj);
 	}
 }

@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
-#include <ctype.h>
 
+#include "cmark_ctype.h"
 #include "config.h"
 #include "parser.h"
 #include "cmark.h"
@@ -20,11 +20,11 @@
 
 static void
 S_parser_feed(cmark_parser *parser, const unsigned char *buffer, size_t len,
-	      bool eof);
+              bool eof);
 
 static void
 S_process_line(cmark_parser *parser, const unsigned char *buffer,
-	       size_t bytes);
+               size_t bytes);
 
 static cmark_node* make_block(cmark_node_type tag, int start_line, int start_column)
 {
@@ -64,6 +64,7 @@ cmark_parser *cmark_parser_new()
 	parser->current = document;
 	parser->line_number = 0;
 	parser->curline = line;
+	parser->last_line_length = 0;
 	parser->linebuf = buf;
 
 	return parser;
@@ -80,20 +81,20 @@ void cmark_parser_free(cmark_parser *parser)
 }
 
 static cmark_node*
-finalize(cmark_parser *parser, cmark_node* b, int line_number);
+finalize(cmark_parser *parser, cmark_node* b);
 
 // Returns true if line has only space characters, else false.
 static bool is_blank(cmark_strbuf *s, int offset)
 {
 	while (offset < s->size) {
 		switch (s->ptr[offset]) {
-			case '\n':
-				return true;
-			case ' ':
-				offset++;
-				break;
-			default:
-				return false;
+		case '\n':
+			return true;
+		case ' ':
+			offset++;
+			break;
+		default:
+			return false;
 		}
 	}
 
@@ -103,22 +104,22 @@ static bool is_blank(cmark_strbuf *s, int offset)
 static inline bool can_contain(cmark_node_type parent_type, cmark_node_type child_type)
 {
 	return ( parent_type == NODE_DOCUMENT ||
-			parent_type == NODE_BLOCK_QUOTE ||
-			parent_type == NODE_LIST_ITEM ||
-			(parent_type == NODE_LIST && child_type == NODE_LIST_ITEM) );
+	         parent_type == NODE_BLOCK_QUOTE ||
+	         parent_type == NODE_ITEM ||
+	         (parent_type == NODE_LIST && child_type == NODE_ITEM) );
 }
 
 static inline bool accepts_lines(cmark_node_type block_type)
 {
 	return (block_type == NODE_PARAGRAPH ||
-		block_type == NODE_HEADER ||
-		block_type == NODE_CODE_BLOCK);
+	        block_type == NODE_HEADER ||
+	        block_type == NODE_CODE_BLOCK);
 }
 
-static void add_line(cmark_node* cmark_node, cmark_chunk *ch, int offset)
+static void add_line(cmark_node* node, cmark_chunk *ch, int offset)
 {
-	assert(cmark_node->open);
-	cmark_strbuf_put(&cmark_node->string_content, ch->data + offset, ch->len - offset);
+	assert(node->open);
+	cmark_strbuf_put(&node->string_content, ch->data + offset, ch->len - offset);
 }
 
 static void remove_trailing_blank_lines(cmark_strbuf *ln)
@@ -144,20 +145,24 @@ static void remove_trailing_blank_lines(cmark_strbuf *ln)
 
 // Check to see if a cmark_node ends with a blank line, descending
 // if needed into lists and sublists.
-static bool ends_with_blank_line(cmark_node* cmark_node)
+static bool ends_with_blank_line(cmark_node* node)
 {
-	if (cmark_node->last_line_blank) {
-		return true;
+	cmark_node *cur = node;
+	while (cur != NULL) {
+		if (cur->last_line_blank) {
+			return true;
+		}
+		if (cur->type == NODE_LIST || cur->type == NODE_ITEM) {
+			cur = cur->last_child;
+		} else {
+			cur = NULL;
+		}
 	}
-	if ((cmark_node->type == NODE_LIST || cmark_node->type == NODE_LIST_ITEM) && cmark_node->last_child) {
-		return ends_with_blank_line(cmark_node->last_child);
-	} else {
-		return false;
-	}
+	return false;
 }
 
 // Break out of all containing lists
-static int break_out_of_lists(cmark_parser *parser, cmark_node ** bptr, int line_number)
+static int break_out_of_lists(cmark_parser *parser, cmark_node ** bptr)
 {
 	cmark_node *container = *bptr;
 	cmark_node *b = parser->root;
@@ -167,9 +172,9 @@ static int break_out_of_lists(cmark_parser *parser, cmark_node ** bptr, int line
 	}
 	if (b) {
 		while (container && container != b) {
-			container = finalize(parser, container, line_number);
+			container = finalize(parser, container);
 		}
-		finalize(parser, b, line_number);
+		finalize(parser, b);
 		*bptr = b->parent;
 	}
 	return 0;
@@ -177,7 +182,7 @@ static int break_out_of_lists(cmark_parser *parser, cmark_node ** bptr, int line
 
 
 static cmark_node*
-finalize(cmark_parser *parser, cmark_node* b, int line_number)
+finalize(cmark_parser *parser, cmark_node* b)
 {
 	int firstlinelen;
 	int pos;
@@ -187,106 +192,114 @@ finalize(cmark_parser *parser, cmark_node* b, int line_number)
 
 	parent = b->parent;
 
-	// don't do anything if the cmark_node is already closed
-	if (!b->open)
-		return parent;
-
+	assert(b->open);  // shouldn't call finalize on closed blocks
 	b->open = false;
-	if (line_number > b->start_line) {
-		b->end_line = line_number - 1;
+
+	if (parser->curline->size == 0) {
+		// end of input - line number has not been incremented
+		b->end_line = parser->line_number;
+		b->end_column = parser->last_line_length;
+	} else if (b->type == NODE_DOCUMENT ||
+	           (b->type == NODE_CODE_BLOCK && b->as.code.fenced) ||
+	           (b->type == NODE_HEADER && b->as.header.setext)) {
+		b->end_line = parser->line_number;
+		b->end_column = parser->curline->size -
+		                (parser->curline->ptr[parser->curline->size - 1] == '\n' ?
+		                 1 : 0);
 	} else {
-		b->end_line = line_number;
+		b->end_line = parser->line_number - 1;
+		b->end_column = parser->last_line_length;
 	}
 
 	switch (b->type) {
-		case NODE_PARAGRAPH:
-			while (cmark_strbuf_at(&b->string_content, 0) == '[' &&
-					(pos = cmark_parse_reference_inline(&b->string_content, parser->refmap))) {
+	case NODE_PARAGRAPH:
+		while (cmark_strbuf_at(&b->string_content, 0) == '[' &&
+		       (pos = cmark_parse_reference_inline(&b->string_content, parser->refmap))) {
 
-				cmark_strbuf_drop(&b->string_content, pos);
+			cmark_strbuf_drop(&b->string_content, pos);
+		}
+		if (is_blank(&b->string_content, 0)) {
+			// remove blank node (former reference def)
+			cmark_node_free(b);
+		}
+		break;
+
+	case NODE_CODE_BLOCK:
+		if (!b->as.code.fenced) { // indented code
+			remove_trailing_blank_lines(&b->string_content);
+			cmark_strbuf_putc(&b->string_content, '\n');
+		} else {
+
+			// first line of contents becomes info
+			firstlinelen = cmark_strbuf_strchr(&b->string_content, '\n', 0);
+
+			cmark_strbuf tmp = GH_BUF_INIT;
+			houdini_unescape_html_f(
+			    &tmp,
+			    b->string_content.ptr,
+			    firstlinelen
+			);
+			cmark_strbuf_trim(&tmp);
+			cmark_strbuf_unescape(&tmp);
+			b->as.code.info = cmark_chunk_buf_detach(&tmp);
+
+			cmark_strbuf_drop(&b->string_content, firstlinelen + 1);
+		}
+		b->as.code.literal = cmark_chunk_buf_detach(&b->string_content);
+		break;
+
+	case NODE_HTML:
+		b->as.literal = cmark_chunk_buf_detach(&b->string_content);
+		break;
+
+	case NODE_LIST: // determine tight/loose status
+		b->as.list.tight = true; // tight by default
+		item = b->first_child;
+
+		while (item) {
+			// check for non-final non-empty list item ending with blank line:
+			if (item->last_line_blank && item->next) {
+				b->as.list.tight = false;
+				break;
 			}
-			if (is_blank(&b->string_content, 0)) {
-				// remove blank node (former reference def)
-				cmark_node_free(b);
-			}
-			break;
-
-		case NODE_CODE_BLOCK:
-			if (!b->as.code.fenced) { // indented code
-				remove_trailing_blank_lines(&b->string_content);
-				cmark_strbuf_putc(&b->string_content, '\n');
-			} else {
-
-				// first line of contents becomes info
-				firstlinelen = cmark_strbuf_strchr(&b->string_content, '\n', 0);
-
-				cmark_strbuf tmp = GH_BUF_INIT;
-				houdini_unescape_html_f(
-					&tmp,
-					b->string_content.ptr,
-					firstlinelen
-					);
-				cmark_strbuf_trim(&tmp);
-				cmark_strbuf_unescape(&tmp);
-				b->as.code.info = cmark_chunk_buf_detach(&tmp);
-
-				cmark_strbuf_drop(&b->string_content, firstlinelen + 1);
-			}
-			b->as.code.literal = cmark_chunk_buf_detach(&b->string_content);
-			break;
-
-	        case NODE_HTML:
-			b->as.literal = cmark_chunk_buf_detach(&b->string_content);
-			break;
-
-		case NODE_LIST: // determine tight/loose status
-			b->as.list.tight = true; // tight by default
-			item = b->first_child;
-
-			while (item) {
-				// check for non-final non-empty list item ending with blank line:
-				if (item->last_line_blank && item->next) {
+			// recurse into children of list item, to see if there are
+			// spaces between them:
+			subitem = item->first_child;
+			while (subitem) {
+				if (ends_with_blank_line(subitem) &&
+				    (item->next || subitem->next)) {
 					b->as.list.tight = false;
 					break;
 				}
-				// recurse into children of list item, to see if there are
-				// spaces between them:
-				subitem = item->first_child;
-				while (subitem) {
-					if (ends_with_blank_line(subitem) &&
-							(item->next || subitem->next)) {
-						b->as.list.tight = false;
-						break;
-					}
-					subitem = subitem->next;
-				}
-				if (!(b->as.list.tight)) {
-					break;
-				}
-				item = item->next;
+				subitem = subitem->next;
 			}
+			if (!(b->as.list.tight)) {
+				break;
+			}
+			item = item->next;
+		}
 
-			break;
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 	return parent;
 }
 
 // Add a cmark_node as child of another.  Return pointer to child.
 static cmark_node* add_child(cmark_parser *parser, cmark_node* parent,
-		cmark_node_type block_type, int start_line, int start_column)
+                             cmark_node_type block_type, int start_column)
 {
 	assert(parent);
 
 	// if 'parent' isn't the kind of cmark_node that can accept this child,
 	// then back up til we hit a cmark_node that can.
 	while (!can_contain(parent->type, block_type)) {
-		parent = finalize(parser, parent, start_line);
+		parent = finalize(parser, parent);
 	}
 
-	cmark_node* child = make_block(block_type, start_line, start_column);
+	cmark_node* child = make_block(block_type, parser->line_number, start_column);
 	child->parent = parent;
 
 	if (parent->last_child) {
@@ -336,7 +349,7 @@ static int parse_list_marker(cmark_chunk *input, int pos, cmark_list **dataptr)
 
 	if ((c == '*' || c == '-' || c == '+') && !scan_hrule(input, pos)) {
 		pos++;
-		if (!isspace(peek_at(input, pos))) {
+		if (!cmark_isspace(peek_at(input, pos))) {
 			return 0;
 		}
 		data = (cmark_list *)calloc(1, sizeof(*data));
@@ -350,18 +363,18 @@ static int parse_list_marker(cmark_chunk *input, int pos, cmark_list **dataptr)
 			data->delimiter = CMARK_PERIOD_DELIM;
 			data->tight = false;
 		}
-	} else if (isdigit(c)) {
+	} else if (cmark_isdigit(c)) {
 		int start = 0;
 
 		do {
 			start = (10 * start) + (peek_at(input, pos) - '0');
 			pos++;
-		} while (isdigit(peek_at(input, pos)));
+		} while (cmark_isdigit(peek_at(input, pos)));
 
 		c = peek_at(input, pos);
 		if (c == '.' || c == ')') {
 			pos++;
-			if (!isspace(peek_at(input, pos))) {
+			if (!cmark_isspace(peek_at(input, pos))) {
 				return 0;
 			}
 			data = (cmark_list *)calloc(1, sizeof(*data));
@@ -391,19 +404,18 @@ static int parse_list_marker(cmark_chunk *input, int pos, cmark_list **dataptr)
 static int lists_match(cmark_list *list_data, cmark_list *item_data)
 {
 	return (list_data->list_type == item_data->list_type &&
-			list_data->delimiter == item_data->delimiter &&
-			// list_data->marker_offset == item_data.marker_offset &&
-			list_data->bullet_char == item_data->bullet_char);
+	        list_data->delimiter == item_data->delimiter &&
+	        // list_data->marker_offset == item_data.marker_offset &&
+	        list_data->bullet_char == item_data->bullet_char);
 }
 
 static cmark_node *finalize_document(cmark_parser *parser)
 {
 	while (parser->current != parser->root) {
-		parser->current = finalize(parser, parser->current,
-					   parser->line_number);
+		parser->current = finalize(parser, parser->current);
 	}
 
-	finalize(parser, parser->root, parser->line_number);
+	finalize(parser, parser->root);
 	process_inlines(parser->root, parser->refmap);
 
 	return parser->root;
@@ -449,23 +461,21 @@ cmark_parser_feed(cmark_parser *parser, const char *buffer, size_t len)
 
 static void
 S_parser_feed(cmark_parser *parser, const unsigned char *buffer, size_t len,
-	      bool eof)
+              bool eof)
 {
 	const unsigned char *end = buffer + len;
 
 	while (buffer < end) {
 		const unsigned char *eol
-			= (const unsigned char *)memchr(buffer, '\n',
-							end - buffer);
+		    = (const unsigned char *)memchr(buffer, '\n',
+		                                    end - buffer);
 		size_t line_len;
 
 		if (eol) {
 			line_len = eol + 1 - buffer;
-		}
-		else if (eof) {
+		} else if (eof) {
 			line_len = end - buffer;
-		}
-		else {
+		} else {
 			cmark_strbuf_put(parser->linebuf, buffer, end - buffer);
 			break;
 		}
@@ -473,10 +483,9 @@ S_parser_feed(cmark_parser *parser, const unsigned char *buffer, size_t len,
 		if (parser->linebuf->size > 0) {
 			cmark_strbuf_put(parser->linebuf, buffer, line_len);
 			S_process_line(parser, parser->linebuf->ptr,
-				       parser->linebuf->size);
+			               parser->linebuf->size);
 			cmark_strbuf_clear(parser->linebuf);
-		}
-		else {
+		} else {
 			S_process_line(parser, buffer, line_len);
 		}
 
@@ -558,12 +567,12 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 				all_matched = false;
 			}
 
-		} else if (container->type == NODE_LIST_ITEM) {
+		} else if (container->type == NODE_ITEM) {
 
 			if (indent >= container->as.list.marker_offset +
-					container->as.list.padding) {
+			    container->as.list.padding) {
 				offset += container->as.list.marker_offset +
-					container->as.list.padding;
+				          container->as.list.padding;
 			} else if (blank) {
 				offset = first_nonspace;
 			} else {
@@ -580,34 +589,45 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 				} else {
 					all_matched = false;
 				}
-			} else {
-				// skip optional spaces of fence offset
-				i = container->as.code.fence_offset;
-				while (i > 0 && peek_at(&input, offset) == ' ') {
-					offset++;
-					i--;
+			} else { // fenced
+				matched = 0;
+				if (indent <= 3 &&
+					(peek_at(&input, first_nonspace) ==
+					 container->as.code.fence_char)) {
+					matched = scan_close_code_fence(&input,
+							first_nonspace);
+				}
+				if (matched >= container->as.code.fence_length) {
+					// closing fence - and since we're at
+					// the end of a line, we can return:
+					all_matched = false;
+					offset += matched;
+					parser->current = finalize(parser, container);
+					goto finished;
+				} else {
+					// skip opt. spaces of fence offset
+					i = container->as.code.fence_offset;
+					while (i > 0 &&
+					    peek_at(&input, offset) == ' ') {
+						offset++;
+						i--;
+					}
 				}
 			}
-
 		} else if (container->type == NODE_HEADER) {
 
 			// a header can never contain more than one line
 			all_matched = false;
-			if (blank) {
-				container->last_line_blank = true;
-			}
 
 		} else if (container->type == NODE_HTML) {
 
 			if (blank) {
-				container->last_line_blank = true;
 				all_matched = false;
 			}
 
 		} else if (container->type == NODE_PARAGRAPH) {
 
 			if (blank) {
-				container->last_line_blank = true;
 				all_matched = false;
 			}
 
@@ -623,12 +643,12 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 
 	// check to see if we've hit 2nd blank line, break out of list:
 	if (blank && container->last_line_blank) {
-		break_out_of_lists(parser, &container, parser->line_number);
+		break_out_of_lists(parser, &container);
 	}
 
 	// unless last matched container is code cmark_node, try new container starts:
 	while (container->type != NODE_CODE_BLOCK &&
-			container->type != NODE_HTML) {
+	       container->type != NODE_HTML) {
 
 		first_nonspace = offset;
 		while (peek_at(&input, first_nonspace) == ' ')
@@ -640,7 +660,7 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 		if (indent >= CODE_INDENT) {
 			if (cur->type != NODE_PARAGRAPH && !blank) {
 				offset += CODE_INDENT;
-				container = add_child(parser, container, NODE_CODE_BLOCK, parser->line_number, offset + 1);
+				container = add_child(parser, container, NODE_CODE_BLOCK, offset + 1);
 				container->as.code.fenced = false;
 				container->as.code.fence_char = 0;
 				container->as.code.fence_length = 0;
@@ -656,12 +676,12 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 			// optional following character
 			if (peek_at(&input, offset) == ' ')
 				offset++;
-			container = add_child(parser, container, NODE_BLOCK_QUOTE, parser->line_number, offset + 1);
+			container = add_child(parser, container, NODE_BLOCK_QUOTE, offset + 1);
 
 		} else if ((matched = scan_atx_header_start(&input, first_nonspace))) {
 
 			offset = first_nonspace + matched;
-			container = add_child(parser, container, NODE_HEADER, parser->line_number, offset + 1);
+			container = add_child(parser, container, NODE_HEADER, offset + 1);
 
 			int hashpos = cmark_chunk_strchr(&input, '#', first_nonspace);
 			int level = 0;
@@ -675,7 +695,7 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 
 		} else if ((matched = scan_open_code_fence(&input, first_nonspace))) {
 
-			container = add_child(parser, container, NODE_CODE_BLOCK, parser->line_number, first_nonspace + 1);
+			container = add_child(parser, container, NODE_CODE_BLOCK, first_nonspace + 1);
 			container->as.code.fenced = true;
 			container->as.code.fence_char = peek_at(&input, first_nonspace);
 			container->as.code.fence_length = matched;
@@ -685,14 +705,14 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 
 		} else if ((matched = scan_html_block_tag(&input, first_nonspace))) {
 
-			container = add_child(parser, container, NODE_HTML, parser->line_number, first_nonspace + 1);
+			container = add_child(parser, container, NODE_HTML, first_nonspace + 1);
 			// note, we don't adjust offset because the tag is part of the text
 
 		} else if (container->type == NODE_PARAGRAPH &&
-				(lev = scan_setext_header_line(&input, first_nonspace)) &&
-				// check that there is only one line in the paragraph:
-				cmark_strbuf_strrchr(&container->string_content, '\n',
-					cmark_strbuf_len(&container->string_content) - 2) < 0) {
+		           (lev = scan_setext_header_line(&input, first_nonspace)) &&
+		           // check that there is only one line in the paragraph:
+		           cmark_strbuf_strrchr(&container->string_content, '\n',
+		                                cmark_strbuf_len(&container->string_content) - 2) < 0) {
 
 			container->type = NODE_HEADER;
 			container->as.header.level = lev;
@@ -700,12 +720,11 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 			offset = input.len - 1;
 
 		} else if (!(container->type == NODE_PARAGRAPH && !all_matched) &&
-				(matched = scan_hrule(&input, first_nonspace))) {
+		           (matched = scan_hrule(&input, first_nonspace))) {
 
 			// it's only now that we know the line is not part of a setext header:
-			container = add_child(parser, container, NODE_HRULE, parser->line_number, first_nonspace + 1);
-			container = finalize(parser, container,
-					     parser->line_number);
+			container = add_child(parser, container, NODE_HRULE, first_nonspace + 1);
+			container = finalize(parser, container);
 			offset = input.len - 1;
 
 		} else if ((matched = parse_list_marker(&input, first_nonspace, &data))) {
@@ -733,16 +752,16 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 			data->marker_offset = indent;
 
 			if (container->type != NODE_LIST ||
-					!lists_match(&container->as.list, data)) {
-				container = add_child(parser, container, NODE_LIST, parser->line_number,
-						first_nonspace + 1);
+			    !lists_match(&container->as.list, data)) {
+				container = add_child(parser, container, NODE_LIST,
+				                      first_nonspace + 1);
 
 				memcpy(&container->as.list, data, sizeof(*data));
 			}
 
 			// add the list item
-			container = add_child(parser, container, NODE_LIST_ITEM, parser->line_number,
-					first_nonspace + 1);
+			container = add_child(parser, container, NODE_ITEM,
+			                      first_nonspace + 1);
 			/* TODO: static */
 			memcpy(&container->as.list, data, sizeof(*data));
 			free(data);
@@ -766,18 +785,22 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 	indent = first_nonspace - offset;
 	blank = peek_at(&input, first_nonspace) == '\n';
 
-	// cmark_node quote lines are never blank as they start with >
+	if (blank && container->last_child) {
+		container->last_child->last_line_blank = true;
+	}
+
+	// block quote lines are never blank as they start with >
 	// and we don't count blanks in fenced code for purposes of tight/loose
 	// lists or breaking out of lists.  we also don't set last_line_blank
 	// on an empty list item.
 	container->last_line_blank = (blank &&
-			container->type != NODE_BLOCK_QUOTE &&
-			container->type != NODE_HEADER &&
-			!(container->type == NODE_CODE_BLOCK &&
-				container->as.code.fenced) &&
-			!(container->type == NODE_LIST_ITEM &&
-				container->first_child == NULL &&
-				container->start_line == parser->line_number));
+	                              container->type != NODE_BLOCK_QUOTE &&
+	                              container->type != NODE_HEADER &&
+	                              !(container->type == NODE_CODE_BLOCK &&
+	                                container->as.code.fenced) &&
+	                              !(container->type == NODE_ITEM &&
+	                                container->first_child == NULL &&
+	                                container->start_line == parser->line_number));
 
 	cmark_node *cont = container;
 	while (cont->parent) {
@@ -786,10 +809,10 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 	}
 
 	if (cur != last_matched_container &&
-			container == last_matched_container &&
-			!blank &&
-			cur->type == NODE_PARAGRAPH &&
-			cmark_strbuf_len(&cur->string_content) > 0) {
+	    container == last_matched_container &&
+	    !blank &&
+	    cur->type == NODE_PARAGRAPH &&
+	    cmark_strbuf_len(&cur->string_content) > 0) {
 
 		add_line(cur, &input, offset);
 
@@ -797,35 +820,12 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 
 		// finalize any blocks that were not matched and set cur to container:
 		while (cur != last_matched_container) {
-			cur = finalize(parser, cur, parser->line_number);
+			cur = finalize(parser, cur);
 			assert(cur != NULL);
 		}
 
-		if (container->type == NODE_CODE_BLOCK &&
-		    !container->as.code.fenced) {
-
-			add_line(container, &input, offset);
-
-		} else if (container->type == NODE_CODE_BLOCK &&
-			   container->as.code.fenced) {
-			matched = 0;
-
-			if (indent <= 3 &&
-					peek_at(&input, first_nonspace) == container->as.code.fence_char) {
-				int fence_len = scan_close_code_fence(&input, first_nonspace);
-				if (fence_len > container->as.code.fence_length)
-					matched = 1;
-			}
-
-			if (matched) {
-				// if closing fence, don't add line to container; instead, close it:
-				container = finalize(parser, container,
-						     parser->line_number);
-			} else {
-				add_line(container, &input, offset);
-			}
-
-		} else if (container->type == NODE_HTML) {
+		if (container->type == NODE_CODE_BLOCK ||
+		    container->type == NODE_HTML) {
 
 			add_line(container, &input, offset);
 
@@ -833,30 +833,28 @@ S_process_line(cmark_parser *parser, const unsigned char *buffer, size_t bytes)
 
 			// ??? do nothing
 
-		} else if (container->type == NODE_HEADER) {
-
-			chop_trailing_hashtags(&input);
-			add_line(container, &input, first_nonspace);
-			container = finalize(parser, container,
-					     parser->line_number);
-
 		} else if (accepts_lines(container->type)) {
 
-			add_line(container, &input, first_nonspace);
-
-		} else if (container->type != NODE_HRULE &&
-			   container->type != NODE_HEADER) {
-
-			// create paragraph container for line
-			container = add_child(parser, container, NODE_PARAGRAPH, parser->line_number, first_nonspace + 1);
+			if (container->type == NODE_HEADER &&
+			    container->as.header.setext == false) {
+				chop_trailing_hashtags(&input);
+			}
 			add_line(container, &input, first_nonspace);
 
 		} else {
-			assert(false);
+			// create paragraph container for line
+			container = add_child(parser, container, NODE_PARAGRAPH, first_nonspace + 1);
+			add_line(container, &input, first_nonspace);
+
 		}
 
 		parser->current = container;
 	}
+finished:
+	parser->last_line_length = parser->curline->size -
+	                           (parser->curline->ptr[parser->curline->size - 1] == '\n' ?
+	                            1 : 0);
+	;
 	cmark_strbuf_clear(parser->curline);
 
 }
@@ -865,7 +863,7 @@ cmark_node *cmark_parser_finish(cmark_parser *parser)
 {
 	if (parser->linebuf->size) {
 		S_process_line(parser, parser->linebuf->ptr,
-			     parser->linebuf->size);
+		               parser->linebuf->size);
 		cmark_strbuf_clear(parser->linebuf);
 	}
 

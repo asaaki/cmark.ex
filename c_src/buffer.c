@@ -1,11 +1,12 @@
 #include <stdarg.h>
-#include <ctype.h>
 #include <string.h>
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "config.h"
+#include "cmark_ctype.h"
 #include "buffer.h"
 
 /* Used as default value for cmark_strbuf->ptr so that people can always
@@ -129,8 +130,8 @@ int cmark_strbuf_set(cmark_strbuf *buf, const unsigned char *data, int len)
 int cmark_strbuf_sets(cmark_strbuf *buf, const char *string)
 {
 	return cmark_strbuf_set(buf,
-			  (const unsigned char *)string,
-			  string ? strlen(string) : 0);
+	                        (const unsigned char *)string,
+	                        string ? strlen(string) : 0);
 }
 
 int cmark_strbuf_putc(cmark_strbuf *buf, int c)
@@ -166,11 +167,16 @@ int cmark_strbuf_vprintf(cmark_strbuf *buf, const char *format, va_list ap)
 	ENSURE_SIZE(buf, expected_size);
 
 	while (1) {
+		va_list args;
+		va_copy(args, ap);
+
 		len = vsnprintf(
-			(char *)buf->ptr + buf->size,
-			buf->asize - buf->size,
-			format, ap
-			);
+		          (char *)buf->ptr + buf->size,
+		          buf->asize - buf->size,
+		          format, args
+		      );
+
+		va_end(args);
 
 		if (len < 0) {
 			free(buf->ptr);
@@ -259,7 +265,7 @@ int cmark_strbuf_cmp(const cmark_strbuf *a, const cmark_strbuf *b)
 {
 	int result = memcmp(a->ptr, b->ptr, MIN(a->size, b->size));
 	return (result != 0) ? result :
-		(a->size < b->size) ? -1 : (a->size > b->size) ? 1 : 0;
+	       (a->size < b->size) ? -1 : (a->size > b->size) ? 1 : 0;
 }
 
 int cmark_strbuf_strchr(const cmark_strbuf *buf, int c, int pos)
@@ -308,7 +314,7 @@ void cmark_strbuf_rtrim(cmark_strbuf *buf)
 		return;
 
 	while (buf->size > 0) {
-		if (!isspace(buf->ptr[buf->size - 1]))
+		if (!cmark_isspace(buf->ptr[buf->size - 1]))
 			break;
 
 		buf->size--;
@@ -324,7 +330,7 @@ void cmark_strbuf_trim(cmark_strbuf *buf)
 	if (!buf->size)
 		return;
 
-	while (i < buf->size && isspace(buf->ptr[i]))
+	while (i < buf->size && cmark_isspace(buf->ptr[i]))
 		i++;
 
 	cmark_strbuf_drop(buf, i);
@@ -365,7 +371,7 @@ extern void cmark_strbuf_unescape(cmark_strbuf *buf)
 	int r, w;
 
 	for (r = 0, w = 0; r < buf->size; ++r) {
-		if (buf->ptr[r] == '\\' && ispunct(buf->ptr[r + 1]))
+		if (buf->ptr[r] == '\\' && cmark_ispunct(buf->ptr[r + 1]))
 			continue;
 
 		buf->ptr[w++] = buf->ptr[r];

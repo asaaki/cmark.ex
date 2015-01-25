@@ -14,12 +14,13 @@ static void escape_man(cmark_strbuf *dest, const unsigned char *source, int leng
 {
 	int i;
 	unsigned char c;
+	bool beginLine = true;
 
 	for (i = 0; i < length; i++) {
 		c = source[i];
-		if (c == '.' && i == 0) {
+		if (c == '.' && beginLine) {
 			cmark_strbuf_puts(dest, "\\&.");
-		} else if (c == '\'' && i == 0) {
+		} else if (c == '\'' && beginLine) {
 			cmark_strbuf_puts(dest, "\\&'");
 		} else if (c == '-') {
 			cmark_strbuf_puts(dest, "\\-");
@@ -28,6 +29,7 @@ static void escape_man(cmark_strbuf *dest, const unsigned char *source, int leng
 		} else {
 			cmark_strbuf_putc(dest, source[i]);
 		}
+		beginLine = (c == '\n');
 	}
 }
 
@@ -43,9 +45,9 @@ struct render_state {
 };
 
 static int
-S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
+S_render_node(cmark_node *node, cmark_event_type ev_type,
+              struct render_state *state)
 {
-	struct render_state *state = vstate;
 	cmark_node *tmp;
 	cmark_strbuf *man = state->man;
 	int list_number;
@@ -60,7 +62,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 		case CMARK_NODE_TEXT:
 		case CMARK_NODE_CODE:
 			escape_man(man, node->as.literal.data,
-				    node->as.literal.len);
+			           node->as.literal.len);
 			break;
 
 		case CMARK_NODE_LINEBREAK:
@@ -93,7 +95,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 	case CMARK_NODE_LIST:
 		break;
 
-	case CMARK_NODE_LIST_ITEM:
+	case CMARK_NODE_ITEM:
 		if (entering) {
 			cr(man);
 			cmark_strbuf_puts(man, ".IP ");
@@ -119,8 +121,8 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 		if (entering) {
 			cr(man);
 			cmark_strbuf_puts(man,
-				    cmark_node_get_header_level(node) == 1 ?
-				    ".SH" : ".SS");
+			                  cmark_node_get_header_level(node) == 1 ?
+			                  ".SH" : ".SS");
 			cr(man);
 		} else {
 			cr(man);
@@ -131,7 +133,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 		cr(man);
 		cmark_strbuf_puts(man, ".IP\n.nf\n\\f[C]\n");
 		escape_man(man, node->as.code.literal.data,
-			   node->as.code.literal.len);
+		           node->as.code.literal.len);
 		cr(man);
 		cmark_strbuf_puts(man, "\\f[]\n.fi");
 		cr(man);
@@ -150,7 +152,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 		if (entering) {
 			// no blank line if first paragraph in list:
 			if (node->parent &&
-			    node->parent->type == CMARK_NODE_LIST_ITEM &&
+			    node->parent->type == CMARK_NODE_ITEM &&
 			    node->prev == NULL) {
 				// no blank line or .PP
 			} else {
@@ -164,7 +166,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 
 	case CMARK_NODE_TEXT:
 		escape_man(man, node->as.literal.data,
-			    node->as.literal.len);
+		           node->as.literal.len);
 		break;
 
 	case CMARK_NODE_LINEBREAK:
@@ -204,7 +206,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 	case CMARK_NODE_LINK:
 		if (!entering) {
 			cmark_strbuf_printf(man, " (%s)",
-				      cmark_node_get_url(node));
+			                    cmark_node_get_url(node));
 		}
 		break;
 
@@ -226,7 +228,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type, void *vstate)
 	return 1;
 }
 
-char *cmark_render_man(cmark_node *root)
+char *cmark_render_man(cmark_node *root, long options)
 {
 	char *result;
 	cmark_strbuf man = GH_BUF_INIT;
@@ -235,6 +237,8 @@ char *cmark_render_man(cmark_node *root)
 	cmark_event_type ev_type;
 	cmark_iter *iter = cmark_iter_new(root);
 
+	if (options == 0) options = 0; // avoid warning about unused parameters
+
 	while ((ev_type = cmark_iter_next(iter)) != CMARK_EVENT_DONE) {
 		cur = cmark_iter_get_node(iter);
 		S_render_node(cur, ev_type, &state);
@@ -242,6 +246,5 @@ char *cmark_render_man(cmark_node *root)
 	result = (char *)cmark_strbuf_detach(&man);
 
 	cmark_iter_free(iter);
-	cmark_strbuf_free(&man);
 	return result;
 }

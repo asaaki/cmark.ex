@@ -7,8 +7,76 @@
 static void
 S_node_unlink(cmark_node *node);
 
+static inline bool
+S_is_block(cmark_node *node)
+{
+	if (node == NULL) {
+		return false;
+	}
+	return node->type >= CMARK_NODE_FIRST_BLOCK
+	       && node->type <= CMARK_NODE_LAST_BLOCK;
+}
+
+static inline bool
+S_is_inline(cmark_node *node)
+{
+	if (node == NULL) {
+		return false;
+	}
+	return node->type >= CMARK_NODE_FIRST_INLINE
+	       && node->type <= CMARK_NODE_LAST_INLINE;
+}
+
+static bool
+S_can_contain(cmark_node *node, cmark_node *child)
+{
+	cmark_node *cur;
+
+	if (node == NULL || child == NULL) {
+		return false;
+	}
+
+	// Verify that child is not an ancestor of node or equal to node.
+	cur = node;
+	do {
+		if (cur == child) {
+			return false;
+		}
+		cur = cur->parent;
+	} while (cur != NULL);
+
+	if (child->type == CMARK_NODE_DOCUMENT) {
+		return false;
+	}
+
+	switch (node->type) {
+	case CMARK_NODE_DOCUMENT:
+	case CMARK_NODE_BLOCK_QUOTE:
+	case CMARK_NODE_ITEM:
+		return S_is_block(child)
+		       && child->type != CMARK_NODE_ITEM;
+
+	case CMARK_NODE_LIST:
+		return child->type == CMARK_NODE_ITEM;
+
+	case CMARK_NODE_PARAGRAPH:
+	case CMARK_NODE_HEADER:
+	case CMARK_NODE_EMPH:
+	case CMARK_NODE_STRONG:
+	case CMARK_NODE_LINK:
+	case CMARK_NODE_IMAGE:
+		return S_is_inline(child);
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
 cmark_node*
-cmark_node_new(cmark_node_type type) {
+cmark_node_new(cmark_node_type type)
+{
 	cmark_node *node = (cmark_node *)calloc(1, sizeof(*node));
 	node->type = type;
 
@@ -38,8 +106,10 @@ void S_free_nodes(cmark_node *e)
 {
 	cmark_node *next;
 	while (e != NULL) {
-		cmark_strbuf_free(&e->string_content);
-		switch (e->type){
+		if (S_is_block(e)) {
+			cmark_strbuf_free(&e->string_content);
+		}
+		switch (e->type) {
 		case NODE_CODE_BLOCK:
 			cmark_chunk_free(&e->as.code.info);
 			cmark_chunk_free(&e->as.code.literal);
@@ -52,8 +122,12 @@ void S_free_nodes(cmark_node *e)
 			break;
 		case NODE_LINK:
 		case NODE_IMAGE:
-			free(e->as.link.url);
-			free(e->as.link.title);
+			if (e->as.link.url) {
+				free(e->as.link.url);
+			}
+			if (e->as.link.title) {
+				free(e->as.link.title);
+			}
 			break;
 		default:
 			break;
@@ -70,7 +144,8 @@ void S_free_nodes(cmark_node *e)
 }
 
 void
-cmark_node_free(cmark_node *node) {
+cmark_node_free(cmark_node *node)
+{
 	S_node_unlink(node);
 	node->next = NULL;
 	S_free_nodes(node);
@@ -86,33 +161,52 @@ cmark_node_get_type(cmark_node *node)
 	}
 }
 
-static const char*
-S_type_string(cmark_node *node)
+const char*
+cmark_node_get_type_string(cmark_node *node)
 {
 	if (node == NULL) {
 		return "NONE";
 	}
 
 	switch (node->type) {
-	case CMARK_NODE_NONE:          return "NONE";
-	case CMARK_NODE_DOCUMENT:      return "DOCUMENT";
-	case CMARK_NODE_BLOCK_QUOTE:   return "BLOCK_QUOTE";
-	case CMARK_NODE_LIST:          return "LIST";
-	case CMARK_NODE_LIST_ITEM:     return "LIST_ITEM";
-	case CMARK_NODE_CODE_BLOCK:    return "CODE_BLOCK";
-	case CMARK_NODE_HTML:          return "HTML";
-	case CMARK_NODE_PARAGRAPH:     return "PARAGRAPH";
-	case CMARK_NODE_HEADER:	       return "HEADER";
-	case CMARK_NODE_HRULE:         return "HRULE";
-	case CMARK_NODE_TEXT:          return "TEXT";
-	case CMARK_NODE_SOFTBREAK:     return "SOFTBREAK";
-	case CMARK_NODE_LINEBREAK:     return "LINEBREAK";
-	case CMARK_NODE_CODE:          return "CODE";
-	case CMARK_NODE_INLINE_HTML:   return "INLINE_HTML";
-	case CMARK_NODE_EMPH:          return "EMPH";
-	case CMARK_NODE_STRONG:        return "STRONG";
-	case CMARK_NODE_LINK:          return "LINK";
-	case CMARK_NODE_IMAGE:         return "IMAGE";
+	case CMARK_NODE_NONE:
+		return "none";
+	case CMARK_NODE_DOCUMENT:
+		return "document";
+	case CMARK_NODE_BLOCK_QUOTE:
+		return "block_quote";
+	case CMARK_NODE_LIST:
+		return "list";
+	case CMARK_NODE_ITEM:
+		return "item";
+	case CMARK_NODE_CODE_BLOCK:
+		return "code_block";
+	case CMARK_NODE_HTML:
+		return "html";
+	case CMARK_NODE_PARAGRAPH:
+		return "paragraph";
+	case CMARK_NODE_HEADER:
+		return "header";
+	case CMARK_NODE_HRULE:
+		return "hrule";
+	case CMARK_NODE_TEXT:
+		return "text";
+	case CMARK_NODE_SOFTBREAK:
+		return "softbreak";
+	case CMARK_NODE_LINEBREAK:
+		return "linebreak";
+	case CMARK_NODE_CODE:
+		return "code";
+	case CMARK_NODE_INLINE_HTML:
+		return "inline_html";
+	case CMARK_NODE_EMPH:
+		return "emph";
+	case CMARK_NODE_STRONG:
+		return "strong";
+	case CMARK_NODE_LINK:
+		return "link";
+	case CMARK_NODE_IMAGE:
+		return "image";
 	}
 
 	return "<unknown>";
@@ -168,8 +262,27 @@ cmark_node_last_child(cmark_node *node)
 	}
 }
 
+void*
+cmark_node_get_user_data(cmark_node *node) {
+	if (node == NULL) {
+		return NULL;
+	} else {
+		return node->user_data;
+	}
+}
+
+int
+cmark_node_set_user_data(cmark_node *node, void *user_data) {
+	if (node == NULL) {
+		return 0;
+	}
+	node->user_data = user_data;
+	return 1;
+}
+
 static char*
-S_strdup(const char *str) {
+S_strdup(const char *str)
+{
 	size_t size = strlen(str) + 1;
 	char *dup = (char *)malloc(size);
 	memcpy(dup, str, size);
@@ -177,7 +290,8 @@ S_strdup(const char *str) {
 }
 
 const char*
-cmark_node_get_literal(cmark_node *node) {
+cmark_node_get_literal(cmark_node *node)
+{
 	if (node == NULL) {
 		return NULL;
 	}
@@ -200,7 +314,8 @@ cmark_node_get_literal(cmark_node *node) {
 }
 
 int
-cmark_node_set_literal(cmark_node *node, const char *content) {
+cmark_node_set_literal(cmark_node *node, const char *content)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -225,7 +340,8 @@ cmark_node_set_literal(cmark_node *node, const char *content) {
 }
 
 int
-cmark_node_get_header_level(cmark_node *node) {
+cmark_node_get_header_level(cmark_node *node)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -242,7 +358,8 @@ cmark_node_get_header_level(cmark_node *node) {
 }
 
 int
-cmark_node_set_header_level(cmark_node *node, int level) {
+cmark_node_set_header_level(cmark_node *node, int level)
+{
 	if (node == NULL || level < 1 || level > 6) {
 		return 0;
 	}
@@ -260,21 +377,22 @@ cmark_node_set_header_level(cmark_node *node, int level) {
 }
 
 cmark_list_type
-cmark_node_get_list_type(cmark_node *node) {
+cmark_node_get_list_type(cmark_node *node)
+{
 	if (node == NULL) {
 		return CMARK_NO_LIST;
 	}
 
 	if (node->type == CMARK_NODE_LIST) {
 		return node->as.list.list_type;
-	}
-	else {
+	} else {
 		return CMARK_NO_LIST;
 	}
 }
 
 int
-cmark_node_set_list_type(cmark_node *node, cmark_list_type type) {
+cmark_node_set_list_type(cmark_node *node, cmark_list_type type)
+{
 	if (!(type == CMARK_BULLET_LIST || type == CMARK_ORDERED_LIST)) {
 		return 0;
 	}
@@ -286,28 +404,61 @@ cmark_node_set_list_type(cmark_node *node, cmark_list_type type) {
 	if (node->type == CMARK_NODE_LIST) {
 		node->as.list.list_type = type;
 		return 1;
+	} else {
+		return 0;
 	}
-	else {
+}
+
+cmark_delim_type
+cmark_node_get_list_delim(cmark_node *node)
+{
+	if (node == NULL) {
+		return CMARK_NO_DELIM;
+	}
+
+	if (node->type == CMARK_NODE_LIST) {
+		return node->as.list.delimiter;
+	} else {
+		return CMARK_NO_DELIM;
+	}
+}
+
+int
+cmark_node_set_list_delim(cmark_node *node, cmark_delim_type delim)
+{
+	if (!(delim == CMARK_PERIOD_DELIM || delim == CMARK_PAREN_DELIM)) {
+		return 0;
+	}
+
+	if (node == NULL) {
+		return 0;
+	}
+
+	if (node->type == CMARK_NODE_LIST) {
+		node->as.list.delimiter = delim;
+		return 1;
+	} else {
 		return 0;
 	}
 }
 
 int
-cmark_node_get_list_start(cmark_node *node) {
+cmark_node_get_list_start(cmark_node *node)
+{
 	if (node == NULL) {
 		return 0;
 	}
 
 	if (node->type == CMARK_NODE_LIST) {
 		return node->as.list.start;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
 
 int
-cmark_node_set_list_start(cmark_node *node, int start) {
+cmark_node_set_list_start(cmark_node *node, int start)
+{
 	if (node == NULL || start < 0) {
 		return 0;
 	}
@@ -315,28 +466,28 @@ cmark_node_set_list_start(cmark_node *node, int start) {
 	if (node->type == CMARK_NODE_LIST) {
 		node->as.list.start = start;
 		return 1;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
 
 int
-cmark_node_get_list_tight(cmark_node *node) {
+cmark_node_get_list_tight(cmark_node *node)
+{
 	if (node == NULL) {
 		return 0;
 	}
 
 	if (node->type == CMARK_NODE_LIST) {
 		return node->as.list.tight;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
 
 int
-cmark_node_set_list_tight(cmark_node *node, int tight) {
+cmark_node_set_list_tight(cmark_node *node, int tight)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -344,28 +495,28 @@ cmark_node_set_list_tight(cmark_node *node, int tight) {
 	if (node->type == CMARK_NODE_LIST) {
 		node->as.list.tight = tight;
 		return 1;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
 
 const char*
-cmark_node_get_fence_info(cmark_node *node) {
+cmark_node_get_fence_info(cmark_node *node)
+{
 	if (node == NULL) {
 		return NULL;
 	}
 
 	if (node->type == NODE_CODE_BLOCK) {
 		return cmark_chunk_to_cstr(&node->as.code.info);
-	}
-	else {
+	} else {
 		return NULL;
 	}
 }
 
 int
-cmark_node_set_fence_info(cmark_node *node, const char *info) {
+cmark_node_set_fence_info(cmark_node *node, const char *info)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -373,14 +524,14 @@ cmark_node_set_fence_info(cmark_node *node, const char *info) {
 	if (node->type == NODE_CODE_BLOCK) {
 		cmark_chunk_set_cstr(&node->as.code.info, info);
 		return 1;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
 
 const char*
-cmark_node_get_url(cmark_node *node) {
+cmark_node_get_url(cmark_node *node)
+{
 	if (node == NULL) {
 		return NULL;
 	}
@@ -397,7 +548,8 @@ cmark_node_get_url(cmark_node *node) {
 }
 
 int
-cmark_node_set_url(cmark_node *node, const char *url) {
+cmark_node_set_url(cmark_node *node, const char *url)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -416,7 +568,8 @@ cmark_node_set_url(cmark_node *node, const char *url) {
 }
 
 const char*
-cmark_node_get_title(cmark_node *node) {
+cmark_node_get_title(cmark_node *node)
+{
 	if (node == NULL) {
 		return NULL;
 	}
@@ -433,7 +586,8 @@ cmark_node_get_title(cmark_node *node) {
 }
 
 int
-cmark_node_set_title(cmark_node *node, const char *title) {
+cmark_node_set_title(cmark_node *node, const char *title)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -452,7 +606,8 @@ cmark_node_set_title(cmark_node *node, const char *title) {
 }
 
 int
-cmark_node_get_start_line(cmark_node *node) {
+cmark_node_get_start_line(cmark_node *node)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -460,7 +615,8 @@ cmark_node_get_start_line(cmark_node *node) {
 }
 
 int
-cmark_node_get_start_column(cmark_node *node) {
+cmark_node_get_start_column(cmark_node *node)
+{
 	if (node == NULL) {
 		return 0;
 	}
@@ -468,76 +624,21 @@ cmark_node_get_start_column(cmark_node *node) {
 }
 
 int
-cmark_node_get_end_line(cmark_node *node) {
+cmark_node_get_end_line(cmark_node *node)
+{
 	if (node == NULL) {
 		return 0;
 	}
 	return node->end_line;
 }
 
-static inline bool
-S_is_block(cmark_node *node) {
-	if (node == NULL) {
-		return false;
-	}
-	return node->type >= CMARK_NODE_FIRST_BLOCK
-	       && node->type <= CMARK_NODE_LAST_BLOCK;
-}
-
-static inline bool
-S_is_inline(cmark_node *node) {
-	if (node == NULL) {
-		return false;
-	}
-	return node->type >= CMARK_NODE_FIRST_INLINE
-	       && node->type <= CMARK_NODE_LAST_INLINE;
-}
-
-static bool
-S_can_contain(cmark_node *node, cmark_node *child)
+int
+cmark_node_get_end_column(cmark_node *node)
 {
-	cmark_node *cur;
-
-	if (node == NULL || child == NULL) {
-		return false;
+	if (node == NULL) {
+		return 0;
 	}
-
-	// Verify that child is not an ancestor of node or equal to node.
-	cur = node;
-	do {
-		if (cur == child) {
-			return false;
-		}
-		cur = cur->parent;
-	} while (cur != NULL);
-
-	if (child->type == CMARK_NODE_DOCUMENT) {
-		return false;
-	}
-
-	switch (node->type) {
-	case CMARK_NODE_DOCUMENT:
-	case CMARK_NODE_BLOCK_QUOTE:
-	case CMARK_NODE_LIST_ITEM:
-		return S_is_block(child)
-		       && child->type != CMARK_NODE_LIST_ITEM;
-
-	case CMARK_NODE_LIST:
-		return child->type == CMARK_NODE_LIST_ITEM;
-
-	case CMARK_NODE_PARAGRAPH:
-	case CMARK_NODE_HEADER:
-	case CMARK_NODE_EMPH:
-	case CMARK_NODE_STRONG:
-	case CMARK_NODE_LINK:
-	case CMARK_NODE_IMAGE:
-		return S_is_inline(child);
-
-	default:
-		break;
-	}
-
-	return false;
+	return node->end_column;
 }
 
 // Unlink a node without adjusting its next, prev, and parent pointers.
@@ -568,7 +669,8 @@ S_node_unlink(cmark_node *node)
 }
 
 void
-cmark_node_unlink(cmark_node *node) {
+cmark_node_unlink(cmark_node *node)
+{
 	S_node_unlink(node);
 
 	node->next   = NULL;
@@ -665,8 +767,7 @@ cmark_node_prepend_child(cmark_node *node, cmark_node *child)
 
 	if (old_first_child) {
 		old_first_child->prev = child;
-	}
-	else {
+	} else {
 		// Also set last_child if node previously had no children.
 		node->last_child = child;
 	}
@@ -692,8 +793,7 @@ cmark_node_append_child(cmark_node *node, cmark_node *child)
 
 	if (old_last_child) {
 		old_last_child->next = child;
-	}
-	else {
+	} else {
 		// Also set first_child if node previously had no children.
 		node->first_child = child;
 	}
@@ -708,7 +808,8 @@ S_print_error(FILE *out, cmark_node *node, const char *elem)
 		return;
 	}
 	fprintf(out, "Invalid '%s' in node type %s at %d:%d\n", elem,
-		S_type_string(node), node->start_line, node->start_column);
+	        cmark_node_get_type_string(node), node->start_line,
+	        node->start_column);
 }
 
 int
@@ -738,7 +839,7 @@ cmark_node_check(cmark_node *node, FILE *out)
 			continue;
 		}
 
-	next_sibling:
+next_sibling:
 		if (cur == node) {
 			break;
 		}

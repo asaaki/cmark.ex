@@ -2,7 +2,8 @@
 #define CMARK_H
 
 #include <stdio.h>
-#include "cmark_export.h"
+#include <cmark_export.h>
+#include <cmark_version.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,10 +18,6 @@ extern "C" {
  *
  * ## Simple Interface
  */
-
-/** Current version of library.
- */
-#define CMARK_VERSION "0.1"
 
 /** Convert 'text' (assumed to be a UTF-8 encoded string with length
  * 'len' from CommonMark Markdown to HTML, returning a null-terminated,
@@ -40,7 +37,7 @@ typedef enum {
 	CMARK_NODE_DOCUMENT,
 	CMARK_NODE_BLOCK_QUOTE,
 	CMARK_NODE_LIST,
-	CMARK_NODE_LIST_ITEM,
+	CMARK_NODE_ITEM,
 	CMARK_NODE_CODE_BLOCK,
 	CMARK_NODE_HTML,
 	CMARK_NODE_PARAGRAPH,
@@ -73,6 +70,7 @@ typedef enum {
 }  cmark_list_type;
 
 typedef enum {
+	CMARK_NO_DELIM,
 	CMARK_PERIOD_DELIM,
 	CMARK_PAREN_DELIM
 } cmark_delim_type;
@@ -82,6 +80,7 @@ typedef struct cmark_parser cmark_parser;
 typedef struct cmark_iter cmark_iter;
 
 typedef enum {
+	CMARK_EVENT_NONE,
 	CMARK_EVENT_DONE,
 	CMARK_EVENT_ENTER,
 	CMARK_EVENT_EXIT
@@ -162,9 +161,25 @@ cmark_node_last_child(cmark_node *node);
  *
  *         cmark_iter_free(iter);
  *     }
+ *
+ * Iterators will never return `EXIT` events for leaf nodes, which are nodes
+ * of type:
+ *
+ * * CMARK_NODE_HTML
+ * * CMARK_NODE_HRULE
+ * * CMARK_NODE_CODE_BLOCK
+ * * CMARK_NODE_TEXT
+ * * CMARK_NODE_SOFTBREAK
+ * * CMARK_NODE_LINEBREAK
+ * * CMARK_NODE_CODE
+ * * CMARK_NODE_INLINE_HTML
+ *
+ * Nodes must only be modified after an `EXIT` event, or an `ENTER` event for
+ * leaf nodes.
  */
 
-/** Creates a new iterator starting at 'root'.
+/** Creates a new iterator starting at 'root'.  The current node and event
+ * type are undefined until `cmark_iter_next` is called for the first time.
  */
 CMARK_EXPORT
 cmark_iter*
@@ -176,27 +191,66 @@ CMARK_EXPORT
 void
 cmark_iter_free(cmark_iter *iter);
 
-/** Returns the event type (`CMARK_EVENT_ENTER`, `CMARK_EVENT_EXIT`,
- * or `CMARK_EVENT_DONE`) for the next node.
+/** Advances to the next node and returns the event type (`CMARK_EVENT_ENTER`,
+ * `CMARK_EVENT_EXIT` or `CMARK_EVENT_DONE`).
  */
 CMARK_EXPORT
 cmark_event_type
 cmark_iter_next(cmark_iter *iter);
 
-/** Returns the next node in the sequence described above.
+/** Returns the current node.
  */
 CMARK_EXPORT
 cmark_node*
 cmark_iter_get_node(cmark_iter *iter);
 
+/** Returns the current event type.
+ */
+CMARK_EXPORT
+cmark_event_type
+cmark_iter_get_event_type(cmark_iter *iter);
+
+/** Returns the root node.
+ */
+CMARK_EXPORT
+cmark_node*
+cmark_iter_get_root(cmark_iter *iter);
+
+/** Resets the iterator so that the current node is 'current' and
+ * the event type is 'event_type'.  The new current node must be a
+ * descendant of the root node or the root node itself.
+ */
+CMARK_EXPORT
+void
+cmark_iter_reset(cmark_iter *iter, cmark_node *current,
+                 cmark_event_type event_type);
+
 /**
  * ## Accessors
  */
+
+/** Returns the user data of 'node'.
+ */
+CMARK_EXPORT void*
+cmark_node_get_user_data(cmark_node *node);
+
+/** Sets arbitrary user data for 'node'.  Returns 1 on success,
+ * 0 on failure.
+ */
+CMARK_EXPORT int
+cmark_node_set_user_data(cmark_node *node, void *user_data);
 
 /** Returns the type of 'node', or `CMARK_NODE_NONE` on error.
  */
 CMARK_EXPORT cmark_node_type
 cmark_node_get_type(cmark_node *node);
+
+/** Like 'cmark_node_get_type', but returns a string representation
+    of the type, or `"<unknown>"`.
+ */
+CMARK_EXPORT
+const char*
+cmark_node_get_type_string(cmark_node *node);
 
 /** Returns the string contents of 'node', or NULL if none.
  */
@@ -229,6 +283,18 @@ cmark_node_get_list_type(cmark_node *node);
  */
 CMARK_EXPORT int
 cmark_node_set_list_type(cmark_node *node, cmark_list_type type);
+
+/** Returns the list delimiter type of 'node', or `CMARK_NO_DELIM` if 'node'
+ * is not a list.
+ */
+CMARK_EXPORT cmark_delim_type
+cmark_node_get_list_delim(cmark_node *node);
+
+/** Sets the list delimiter type of 'node', returning 1 on success and 0
+ * on error.
+ */
+CMARK_EXPORT int
+cmark_node_set_list_delim(cmark_node *node, cmark_delim_type delim);
 
 /** Returns starting number of 'node', if it is an ordered list, otherwise 0.
  */
@@ -299,6 +365,11 @@ cmark_node_get_start_column(cmark_node *node);
 CMARK_EXPORT int
 cmark_node_get_end_line(cmark_node *node);
 
+/** Returns the column at which 'node' ends.
+ */
+CMARK_EXPORT int
+cmark_node_get_end_column(cmark_node *node);
+
 /**
  * ## Tree Manipulation
  */
@@ -330,6 +401,11 @@ cmark_node_prepend_child(cmark_node *node, cmark_node *child);
  */
 CMARK_EXPORT int
 cmark_node_append_child(cmark_node *node, cmark_node *child);
+
+/** Consolidates adjacent text nodes.
+ */
+CMARK_EXPORT void
+cmark_consolidate_text_nodes(cmark_node *root);
 
 /**
  * ## Parsing
@@ -388,22 +464,59 @@ cmark_node *cmark_parse_file(FILE *f);
  * ## Rendering
  */
 
-/** Render a 'node' tree for debugging purposes, showing
- * the hierachy of nodes and their types and contents.
+/** Render a 'node' tree as XML.
  */
 CMARK_EXPORT
-char *cmark_render_ast(cmark_node *root);
+char *cmark_render_xml(cmark_node *root, long options);
 
 /** Render a 'node' tree as an HTML fragment.  It is up to the user
  * to add an appropriate header and footer.
  */
 CMARK_EXPORT
-char *cmark_render_html(cmark_node *root);
+char *cmark_render_html(cmark_node *root, long options);
 
 /** Render a 'node' tree as a groff man page, without the header.
  */
 CMARK_EXPORT
-char *cmark_render_man(cmark_node *root);
+char *cmark_render_man(cmark_node *root, long options);
+
+/** Default writer options.
+ */
+#define CMARK_OPT_DEFAULT 0
+
+/** Include a `data-sourcepos` attribute on all block elements.
+ */
+#define CMARK_OPT_SOURCEPOS 1
+
+/** Render `softbreak` elements as hard line breaks.
+ */
+#define CMARK_OPT_HARDBREAKS 2
+
+/** Normalize tree by consolidating adjacent text nodes.
+ */
+#define CMARK_OPT_NORMALIZE 4
+
+/**
+ * ## Version information
+ */
+
+/** The library version as integer for runtime checks. Also available as
+ * macro CMARK_VERSION for compile time checks.
+ *
+ * * Bits 16-23 contain the major version.
+ * * Bits 8-15 contain the minor version.
+ * * Bits 0-7 contain the patchlevel.
+ *
+ * In hexadecimal format, the number 0x010203 represents version 1.2.3.
+ */
+CMARK_EXPORT
+extern const int cmark_version;
+
+/** The library version string for runtime checks. Also available as
+ * macro CMARK_VERSION_STRING for compile time checks.
+ */
+CMARK_EXPORT
+extern const char cmark_version_string[];
 
 /** # AUTHORS
  *
@@ -411,29 +524,29 @@ char *cmark_render_man(cmark_node *root);
  */
 
 #ifndef CMARK_NO_SHORT_NAMES
-  #define NODE_DOCUMENT             CMARK_NODE_DOCUMENT
-  #define NODE_BLOCK_QUOTE          CMARK_NODE_BLOCK_QUOTE
-  #define NODE_LIST                 CMARK_NODE_LIST
-  #define NODE_LIST_ITEM            CMARK_NODE_LIST_ITEM
-  #define NODE_CODE_BLOCK           CMARK_NODE_CODE_BLOCK
-  #define NODE_HTML                 CMARK_NODE_HTML
-  #define NODE_PARAGRAPH            CMARK_NODE_PARAGRAPH
-  #define NODE_HEADER		    CMARK_NODE_HEADER
-  #define NODE_HRULE                CMARK_NODE_HRULE
-  #define NODE_TEXT                 CMARK_NODE_TEXT
-  #define NODE_SOFTBREAK            CMARK_NODE_SOFTBREAK
-  #define NODE_LINEBREAK            CMARK_NODE_LINEBREAK
-  #define NODE_CODE                 CMARK_NODE_CODE
-  #define NODE_INLINE_HTML          CMARK_NODE_INLINE_HTML
-  #define NODE_EMPH                 CMARK_NODE_EMPH
-  #define NODE_STRONG               CMARK_NODE_STRONG
-  #define NODE_LINK                 CMARK_NODE_LINK
-  #define NODE_IMAGE                CMARK_NODE_IMAGE
-  #define NODE_LINK_LABEL           CMARK_NODE_LINK_LABEL
-  #define BULLET_LIST               CMARK_BULLET_LIST
-  #define ORDERED_LIST              CMARK_ORDERED_LIST
-  #define PERIOD_DELIM              CMARK_PERIOD_DELIM
-  #define PAREN_DELIM               CMARK_PAREN_DELIM
+#define NODE_DOCUMENT             CMARK_NODE_DOCUMENT
+#define NODE_BLOCK_QUOTE          CMARK_NODE_BLOCK_QUOTE
+#define NODE_LIST                 CMARK_NODE_LIST
+#define NODE_ITEM                 CMARK_NODE_ITEM
+#define NODE_CODE_BLOCK           CMARK_NODE_CODE_BLOCK
+#define NODE_HTML                 CMARK_NODE_HTML
+#define NODE_PARAGRAPH            CMARK_NODE_PARAGRAPH
+#define NODE_HEADER		    CMARK_NODE_HEADER
+#define NODE_HRULE                CMARK_NODE_HRULE
+#define NODE_TEXT                 CMARK_NODE_TEXT
+#define NODE_SOFTBREAK            CMARK_NODE_SOFTBREAK
+#define NODE_LINEBREAK            CMARK_NODE_LINEBREAK
+#define NODE_CODE                 CMARK_NODE_CODE
+#define NODE_INLINE_HTML          CMARK_NODE_INLINE_HTML
+#define NODE_EMPH                 CMARK_NODE_EMPH
+#define NODE_STRONG               CMARK_NODE_STRONG
+#define NODE_LINK                 CMARK_NODE_LINK
+#define NODE_IMAGE                CMARK_NODE_IMAGE
+#define NODE_LINK_LABEL           CMARK_NODE_LINK_LABEL
+#define BULLET_LIST               CMARK_BULLET_LIST
+#define ORDERED_LIST              CMARK_ORDERED_LIST
+#define PERIOD_DELIM              CMARK_PERIOD_DELIM
+#define PAREN_DELIM               CMARK_PAREN_DELIM
 #endif
 
 #ifdef __cplusplus
