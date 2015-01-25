@@ -10,15 +10,23 @@ DEPS_DIR=deps
 PRIV_DIR=priv
 SRC_DIR=src
 TEST_DIR=test
+TMP_DIR=tmp
 
 CMARK=cmark
-CMARK_SRC_DIR=src_$(CMARK)
+
+CMARK_SRC_REPO=https://github.com/jgm/cmark.git
+CMARK_SRC_DIR=$(TMP_DIR)/$(CMARK)
 CMARK_C_SRC_DIR=$(CMARK_SRC_DIR)/$(SRC_DIR)
-CMARK_C_FILES=$(sort $(filter-out %main.c, $(wildcard $(CMARK_C_SRC_DIR)/*.c)))
+CMARK_C_FILES=$(sort $(filter-out %main.c %print.c, $(wildcard $(CMARK_C_SRC_DIR)/*.c)))
 CMARK_H_FILES=$(sort $(wildcard $(CMARK_C_SRC_DIR)/*.h))
 CMARK_INC_FILES=$(sort $(wildcard $(CMARK_C_SRC_DIR)/*.inc))
 CMARK_BUILD_DIR=$(CMARK_SRC_DIR)/build
-CMARK_SPECS_RUNNER=test/spec_tests.py
+
+PYTHON=python
+CMARK_SPECS_REPO=https://github.com/jgm/CommonMark.git
+CMARK_SPECS_DIR=$(TMP_DIR)/specs
+CMARK_SPECS_FILE=$(CMARK_SPECS_DIR)/spec.txt
+CMARK_SPECS_RUNNER=$(CMARK_SPECS_DIR)/test/spec_tests.py
 CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
 
 C_SRC_DIR=c_src
@@ -97,26 +105,21 @@ version:
 
 ### CLEAN UP
 
-clean: clean-$(CMARK_SRC_DIR) clean-objects clean-dirs
-
-clean-$(CMARK_SRC_DIR):
-	cd $(CMARK_SRC_DIR) && $(MAKE) clean && git clean -d -f -x && git reset --hard
+clean: clean-objects clean-dirs
 
 clean-objects:
 	rm -f $(C_SRC_O_FILES)
 
 clean-dirs:
-	rm -rf $(BUILD_DIR) $(DEPS_DIR) $(PRIV_DIR)
+	rm -rf $(BUILD_DIR) $(DEPS_DIR) $(PRIV_DIR) $(TMP_DIR)
 
 ### DEVELOPMENT
 
 dev-prepare: dev-prebuilt-lib dev-copy-code dev-spec-dump
 
 $(CMARK_SRC_DIR):
-	git submodule update --init --force --recursive
-
-dev-update-deps: $(CMARK_SRC_DIR)
-	git submodule foreach "git clean -x -f -d && git checkout master && git pull"
+	@mkdir -p $(TMP_DIR)
+	@git clone --depth 1 $(CMARK_SRC_REPO) $@
 
 dev-copy-code: $(C_SRC_DIR)
 	cp \
@@ -125,22 +128,28 @@ dev-copy-code: $(C_SRC_DIR)
 		$(CMARK_INC_FILES) \
 		$(CMARK_BUILD_DIR)/src/config.h \
 		$(CMARK_BUILD_DIR)/src/cmark_export.h \
-		$(CMARK_SRC_DIR)/LICENSE \
+		$(CMARK_BUILD_DIR)/src/cmark_version.h \
 	$(C_SRC_DIR)/
 
-dev-prebuilt-lib: dev-update-deps dev-clean-deps
-	mkdir -p $(CMARK_BUILD_DIR) && cd $(CMARK_BUILD_DIR) && cmake .. && $(MAKE)
+dev-copy-license: $(C_SRC_DIR)
+	cp \
+	$(CMARK_SRC_DIR)/LICENSE \
+	$(C_SRC_DIR)/
 
-dev-clean-deps:
-	git submodule foreach "git clean -x -f -d"
+dev-prebuilt-lib: $(CMARK_SRC_DIR)
+	mkdir -p $(CMARK_BUILD_DIR) && cd $(CMARK_BUILD_DIR) && cmake .. && $(MAKE)
 
 dev-build-objects: dev-copy-code build-objects
 
 $(CMARK_SPECS_JSON): dev-spec-dump
 
-dev-spec-dump: $(CMARK_SRC_DIR)
-	@python $(CMARK_SRC_DIR)/$(CMARK_SPECS_RUNNER) \
-	--spec $(CMARK_SRC_DIR)/spec.txt \
+$(CMARK_SPECS_DIR):
+	@mkdir -p $(TMP_DIR)
+	@git clone --depth 1 $(CMARK_SPECS_REPO) $@
+
+dev-spec-dump: $(CMARK_SPECS_DIR)
+	@$(PYTHON) $(CMARK_SPECS_RUNNER) \
+	--spec $(CMARK_SPECS_FILE) \
 	--dump-tests > $(CMARK_SPECS_JSON) \
 	|| true
 
