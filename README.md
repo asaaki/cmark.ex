@@ -7,7 +7,13 @@
 [![Inline docs](http://inch-ci.org/github/asaaki/cmark.ex.svg?branch=master&style=flat-square)](http://inch-ci.org/github/asaaki/cmark.ex)
 [![Support via Gratipay](http://img.shields.io/gratipay/asaaki.svg?style=flat-square)](https://gratipay.com/asaaki)
 
-Elixir NIF for [libcmark](https://github.com/jgm/CommonMark), a parser library following the [CommonMark](http://commonmark.org/) spec.
+Elixir NIF for [cmark (C)](https://github.com/jgm/cmark), a parser library following the [CommonMark](http://commonmark.org/) spec.
+
+## CommonMark
+
+> A strongly specified, highly compatible implementation of Markdown
+
+For more information visit <http://commonmark.org/>.
 
 ## Install
 
