@@ -50,6 +50,12 @@ CMARK_OPTFLAGS=-DNDEBUG
 
 all: version check-cc $(NIF_LIB)
 
+all-dev: dev-prepare all
+
+all-test: all test
+
+all-dev-test: all-dev test
+
 build-objects: $(C_SRC_O_FILES)
 
 $(C_SRC_DIR)/%.o : $(C_SRC_DIR)/%.c
@@ -155,4 +161,4 @@ dev-spec-dump: $(CMARK_SPECS_DIR)
 
 ### PHONY
 
-.PHONY: all check-cc clean dev-build-objects dev-clean-deps dev-copy-code dev-prebuilt-lib dev-prepare dev-spec-dump dev-update-deps docs spec test $(CMARK)
+.PHONY: all all-dev all-dev-test all-test check-cc clean dev-build-objects dev-copy-code dev-copy-license dev-prebuilt-lib dev-prepare dev-spec-dump docs spec test $(CMARK)
