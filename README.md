@@ -76,5 +76,5 @@ callback = fn (html) -> "HTML is #{html |> String.strip}" end
 
 ## Licenses
 
-- Cmark.ex: [MIT/X11](./LICENSE)
-- CommonMark C code: [BSD](./c_src/LICENSE)
+- Cmark.ex: [LICENSE](./LICENSE) (MIT)
+- cmark (C): [c_src/COPYING](./c_src/COPYING) (multiple)

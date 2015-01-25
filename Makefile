@@ -121,7 +121,7 @@ clean-dirs:
 
 ### DEVELOPMENT
 
-dev-prepare: dev-prebuilt-lib dev-copy-code dev-spec-dump
+dev-prepare: dev-prebuilt-lib dev-copy-code dev-copy-license dev-spec-dump
 
 $(CMARK_SRC_DIR):
 	@mkdir -p $(TMP_DIR)
@@ -139,7 +139,7 @@ dev-copy-code: $(C_SRC_DIR)
 
 dev-copy-license: $(C_SRC_DIR)
 	cp \
-	$(CMARK_SRC_DIR)/LICENSE \
+	$(CMARK_SRC_DIR)/COPYING \
 	$(C_SRC_DIR)/
 
 dev-prebuilt-lib: $(CMARK_SRC_DIR)

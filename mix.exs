@@ -52,10 +52,7 @@ defmodule Cmark.Mixfile do
         "Docs"   => "http://hexdocs.pm/cmark/"
       },
       files: [
-        "c_src/*.c",
-        "c_src/*.h",
-        "c_src/*.inc",
-        "c_src/LICENSE",
+        "c_src",
         "lib",
         "LICENSE",
         "Makefile",
