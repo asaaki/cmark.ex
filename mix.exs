@@ -19,14 +19,36 @@ defmodule Mix.Tasks.Spec do
   end
 end
 
+defmodule Cmark.Mixfile.VersionHelper do
+  def get_version do
+    ver = :os.cmd('git describe --always --tags') |> List.to_string |> String.strip(?\n)
+    case ver |> String.split("-") do
+      [<< "v", tag :: binary >>] ->
+        tag
+      [<< "v", tag :: binary >>, commits_since_tag, commit] ->
+        "#{tag}-#{commits_since_tag}+#{commit}"
+    end
+  end
+end
+
+defmodule Mix.Tasks.Version do
+  use Mix.Task
+  alias Cmark.Mixfile.VersionHelper
+
+  @shortdoc "Returns current version"
+  def run(_) do
+    IO.puts "Cmark version: #{VersionHelper.get_version}"
+  end
+end
+
 defmodule Cmark.Mixfile do
   use Mix.Project
-  @version File.read!("VERSION") |> String.strip
+  alias Cmark.Mixfile.VersionHelper
 
   def project do
     [
       app:           :cmark,
-      version:       @version,
+      version:       VersionHelper.get_version,
       elixir:        "~> 1.0",
       compilers:     [:cmark, :elixir, :app],
       deps:          deps,
@@ -61,8 +83,7 @@ defmodule Cmark.Mixfile do
         "Makefile",
         "mix.exs",
         "README.md",
-        "src",
-        "VERSION"
+        "src"
       ]
     ]
   end

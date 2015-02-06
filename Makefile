@@ -105,9 +105,7 @@ docs:
 	@MIX_ENV=docs mix docs
 
 version:
-	@echo "+==============+"
-	@echo "| Cmark v`cat VERSION` |"
-	@echo "+==============+"
+	@mix version
 
 ### CLEAN UP
 
