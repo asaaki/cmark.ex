@@ -7,29 +7,63 @@
 #include "cmark.h"
 #include "node.h"
 #include "buffer.h"
+#include "utf8.h"
 
 // Functions to convert cmark_nodes to groff man strings.
 
 static void escape_man(cmark_strbuf *dest, const unsigned char *source, int length)
 {
-	int i;
-	unsigned char c;
+	int32_t c;
+	int i = 0;
+	int len;
 	bool beginLine = true;
 
-	for (i = 0; i < length; i++) {
-		c = source[i];
-		if (c == '.' && beginLine) {
-			cmark_strbuf_puts(dest, "\\&.");
-		} else if (c == '\'' && beginLine) {
-			cmark_strbuf_puts(dest, "\\&'");
-		} else if (c == '-') {
+	while (i < length) {
+		len = utf8proc_iterate(source + i, length - i, &c);
+		switch(c) {
+		case 46:
+			if (beginLine) {
+				cmark_strbuf_puts(dest, "\\&.");
+			} else {
+				utf8proc_encode_char(c, dest);
+			}
+			break;
+		case 39:
+			if (beginLine) {
+				cmark_strbuf_puts(dest, "\\&'");
+			} else {
+				utf8proc_encode_char(c, dest);
+			}
+			break;
+		case 45:
 			cmark_strbuf_puts(dest, "\\-");
-		} else if (c == '\\') {
+			break;
+		case 92:
 			cmark_strbuf_puts(dest, "\\e");
-		} else {
-			cmark_strbuf_putc(dest, source[i]);
+			break;
+		case 8216: // left single quote
+			cmark_strbuf_puts(dest, "\\[oq]");
+			break;
+		case 8217: // right single quote
+			cmark_strbuf_puts(dest, "\\[cq]");
+			break;
+		case 8220: // left double quote
+			cmark_strbuf_puts(dest, "\\[lq]");
+			break;
+		case 8221: // right double quote
+			cmark_strbuf_puts(dest, "\\[rq]");
+			break;
+		case 8212: // em dash
+			cmark_strbuf_puts(dest, "\\[em]");
+			break;
+		case 8211: // en dash
+			cmark_strbuf_puts(dest, "\\[en]");
+			break;
+		default:
+			utf8proc_encode_char(c, dest);
 		}
-		beginLine = (c == '\n');
+		beginLine = (c == 10);
+		i += len;
 	}
 }
 
@@ -166,7 +200,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type,
 
 	case CMARK_NODE_TEXT:
 		escape_man(man, node->as.literal.data,
-		           node->as.literal.len);
+			   node->as.literal.len);
 		break;
 
 	case CMARK_NODE_LINEBREAK:
@@ -228,7 +262,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type,
 	return 1;
 }
 
-char *cmark_render_man(cmark_node *root, long options)
+char *cmark_render_man(cmark_node *root, int options)
 {
 	char *result;
 	cmark_strbuf man = GH_BUF_INIT;

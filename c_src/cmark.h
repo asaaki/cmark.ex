@@ -452,13 +452,13 @@ cmark_node *cmark_parser_finish(cmark_parser *parser);
  * Returns a pointer to a tree of nodes.
  */
 CMARK_EXPORT
-cmark_node *cmark_parse_document(const char *buffer, size_t len);
+cmark_node *cmark_parse_document(const char *buffer, size_t len, int options);
 
 /** Parse a CommonMark document in file 'f', returning a pointer to
  * a tree of nodes.
  */
 CMARK_EXPORT
-cmark_node *cmark_parse_file(FILE *f);
+cmark_node *cmark_parse_file(FILE *f, int options);
 
 /**
  * ## Rendering
@@ -467,18 +467,18 @@ cmark_node *cmark_parse_file(FILE *f);
 /** Render a 'node' tree as XML.
  */
 CMARK_EXPORT
-char *cmark_render_xml(cmark_node *root, long options);
+char *cmark_render_xml(cmark_node *root, int options);
 
 /** Render a 'node' tree as an HTML fragment.  It is up to the user
  * to add an appropriate header and footer.
  */
 CMARK_EXPORT
-char *cmark_render_html(cmark_node *root, long options);
+char *cmark_render_html(cmark_node *root, int options);
 
 /** Render a 'node' tree as a groff man page, without the header.
  */
 CMARK_EXPORT
-char *cmark_render_man(cmark_node *root, long options);
+char *cmark_render_man(cmark_node *root, int options);
 
 /** Default writer options.
  */
@@ -495,6 +495,10 @@ char *cmark_render_man(cmark_node *root, long options);
 /** Normalize tree by consolidating adjacent text nodes.
  */
 #define CMARK_OPT_NORMALIZE 4
+
+/** Convert straight quotes to curly, --- to em dashes, -- to en dashes.
+ */
+#define CMARK_OPT_SMART 8
 
 /**
  * ## Version information
