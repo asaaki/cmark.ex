@@ -22,7 +22,7 @@ CMARK_H_FILES=$(sort $(wildcard $(CMARK_C_SRC_DIR)/*.h))
 CMARK_INC_FILES=$(sort $(wildcard $(CMARK_C_SRC_DIR)/*.inc))
 CMARK_BUILD_DIR=$(CMARK_SRC_DIR)/build
 
-PYTHON=python
+PYTHON=python3
 CMARK_SPECS_REPO=https://github.com/jgm/CommonMark.git
 CMARK_SPECS_DIR=$(TMP_DIR)/specs
 CMARK_SPECS_FILE=$(CMARK_SPECS_DIR)/spec.txt
@@ -154,7 +154,8 @@ $(CMARK_SPECS_DIR):
 dev-spec-dump: $(CMARK_SPECS_DIR)
 	@$(PYTHON) $(CMARK_SPECS_RUNNER) \
 	--spec $(CMARK_SPECS_FILE) \
-	--dump-tests > $(CMARK_SPECS_JSON) \
+	--dump-tests | \
+	jq -r -M -S "." > $(CMARK_SPECS_JSON) \
 	|| true
 
 ### PHONY
