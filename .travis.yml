@@ -14,8 +14,8 @@ env:
     - CC=gcc
 
 before_install:
-  - wget http://s3.hex.pm/builds/elixir/v1.0.2.zip
-  - unzip -d elixir v1.0.2.zip
+  - wget http://s3.hex.pm/builds/elixir/v1.0.3.zip
+  - unzip -d elixir v1.0.3.zip
   - $CC --version
 
 before_script:
