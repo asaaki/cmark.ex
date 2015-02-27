@@ -105,7 +105,7 @@ docs:
 	@MIX_ENV=docs mix docs
 
 version:
-	@mix version
+	@cat VERSION
 
 ### CLEAN UP
 
