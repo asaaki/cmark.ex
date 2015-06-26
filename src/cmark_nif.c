@@ -13,6 +13,7 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
   ErlNifBinary  output_binary;
   char         *html;
   size_t        html_len;
+  int           options = 0;
 
   if (argc != 1) {
     return enif_make_badarg(env);
@@ -30,7 +31,7 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
     return enif_make_binary(env, &output_binary);
   }
 
-  html = cmark_markdown_to_html((const char *)markdown_binary.data, markdown_binary.size);
+  html = cmark_markdown_to_html((const char *)markdown_binary.data, markdown_binary.size, options);
   html_len = strlen(html);
   enif_release_binary(&markdown_binary);
 
