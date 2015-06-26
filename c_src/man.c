@@ -20,6 +20,9 @@ static void escape_man(cmark_strbuf *dest, const unsigned char *source, int leng
 
 	while (i < length) {
 		len = utf8proc_iterate(source + i, length - i, &c);
+		if (len == -1) { // error condition
+			return;  // return without rendering anything
+		}
 		switch(c) {
 		case 46:
 			if (beginLine) {
@@ -200,7 +203,7 @@ S_render_node(cmark_node *node, cmark_event_type ev_type,
 
 	case CMARK_NODE_TEXT:
 		escape_man(man, node->as.literal.data,
-			   node->as.literal.len);
+		           node->as.literal.len);
 		break;
 
 	case CMARK_NODE_LINEBREAK:

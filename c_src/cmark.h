@@ -24,7 +24,7 @@ extern "C" {
  * UTF-8-encoded string.
  */
 CMARK_EXPORT
-char *cmark_markdown_to_html(const char *text, int len);
+char *cmark_markdown_to_html(const char *text, size_t len, int options);
 
 /** ## Node Structure
  */
@@ -412,11 +412,12 @@ cmark_consolidate_text_nodes(cmark_node *root);
  *
  * Simple interface:
  *
- *     cmark_node *document = cmark_parse_document("Hello *world*", 12);
+ *     cmark_node *document = cmark_parse_document("Hello *world*", 12,
+ *                                                 CMARK_OPT_DEFAULT);
  *
  * Streaming interface:
  *
- *     cmark_parser *parser = cmark_parser_new();
+ *     cmark_parser *parser = cmark_parser_new(CMARK_OPT_DEFAULT);
  *     FILE *fp = fopen("myfile.md", "r");
  *     while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0) {
  *     	   cmark_parser_feed(parser, buffer, bytes);
@@ -431,7 +432,7 @@ cmark_consolidate_text_nodes(cmark_node *root);
 /** Creates a new parser object.
  */
 CMARK_EXPORT
-cmark_parser *cmark_parser_new();
+cmark_parser *cmark_parser_new(int options);
 
 /** Frees memory allocated for a parser object.
  */
@@ -480,6 +481,11 @@ char *cmark_render_html(cmark_node *root, int options);
 CMARK_EXPORT
 char *cmark_render_man(cmark_node *root, int options);
 
+/** Render a 'node' tree as a commonmark document.
+ */
+CMARK_EXPORT
+char *cmark_render_commonmark(cmark_node *root, int options, int width);
+
 /** Default writer options.
  */
 #define CMARK_OPT_DEFAULT 0
@@ -499,6 +505,11 @@ char *cmark_render_man(cmark_node *root, int options);
 /** Convert straight quotes to curly, --- to em dashes, -- to en dashes.
  */
 #define CMARK_OPT_SMART 8
+
+/** Validate UTF-8 in the input before parsing, replacing illegal
+ * sequences with the replacement character U+FFFD.
+ */
+#define CMARK_OPT_VALIDATE_UTF8 16
 
 /**
  * ## Version information
@@ -546,7 +557,6 @@ extern const char cmark_version_string[];
 #define NODE_STRONG               CMARK_NODE_STRONG
 #define NODE_LINK                 CMARK_NODE_LINK
 #define NODE_IMAGE                CMARK_NODE_IMAGE
-#define NODE_LINK_LABEL           CMARK_NODE_LINK_LABEL
 #define BULLET_LIST               CMARK_BULLET_LIST
 #define ORDERED_LIST              CMARK_ORDERED_LIST
 #define PERIOD_DELIM              CMARK_PERIOD_DELIM

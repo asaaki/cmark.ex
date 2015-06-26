@@ -11,14 +11,9 @@
 
 // Functions to convert cmark_nodes to XML strings.
 
-static void escape_xml(cmark_strbuf *dest, const unsigned char *source, int length)
+static void escape_xml(cmark_strbuf *dest, const unsigned char *source, bufsize_t length)
 {
-	if (source != NULL) {
-		if (length < 0)
-			length = strlen((char *)source);
-
-		houdini_escape_html0(dest, source, (size_t)length, 0);
-	}
+	houdini_escape_html0(dest, source, length, 0);
 }
 
 struct render_state {
@@ -118,10 +113,12 @@ S_render_node(cmark_node *node, cmark_event_type ev_type,
 		case CMARK_NODE_LINK:
 		case CMARK_NODE_IMAGE:
 			cmark_strbuf_puts(xml, " destination=\"");
-			escape_xml(xml, node->as.link.url, -1);
+			escape_xml(xml, node->as.link.url.data,
+			           node->as.link.url.len);
 			cmark_strbuf_putc(xml, '"');
 			cmark_strbuf_puts(xml, " title=\"");
-			escape_xml(xml, node->as.link.title, -1);
+			escape_xml(xml, node->as.link.title.data,
+			           node->as.link.title.len);
 			cmark_strbuf_putc(xml, '"');
 			break;
 		default:
