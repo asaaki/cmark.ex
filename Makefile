@@ -23,10 +23,9 @@ CMARK_INC_FILES=$(sort $(wildcard $(CMARK_C_SRC_DIR)/*.inc))
 CMARK_BUILD_DIR=$(CMARK_SRC_DIR)/build
 
 PYTHON=python3
-CMARK_SPECS_REPO=https://github.com/jgm/CommonMark.git
-CMARK_SPECS_DIR=$(TMP_DIR)/specs
+CMARK_SPECS_DIR=$(CMARK_SRC_DIR)/test
 CMARK_SPECS_FILE=$(CMARK_SPECS_DIR)/spec.txt
-CMARK_SPECS_RUNNER=$(CMARK_SPECS_DIR)/test/spec_tests.py
+CMARK_SPECS_RUNNER=$(CMARK_SPECS_DIR)/spec_tests.py
 CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
 
 C_SRC_DIR=c_src
@@ -147,11 +146,7 @@ dev-build-objects: dev-copy-code build-objects
 
 $(CMARK_SPECS_JSON): dev-spec-dump
 
-$(CMARK_SPECS_DIR):
-	@mkdir -p $(TMP_DIR)
-	@git clone --depth 1 $(CMARK_SPECS_REPO) $@
-
-dev-spec-dump: $(CMARK_SPECS_DIR)
+dev-spec-dump: $(CMARK_SRC_DIR)
 	@$(PYTHON) $(CMARK_SPECS_RUNNER) \
 	--spec $(CMARK_SPECS_FILE) \
 	--dump-tests | \
