@@ -15,6 +15,10 @@ matrix:
       otp_release: 18.0
     - elixir: 1.1.0
       otp_release: 18.1
+    - elixir: 1.1.1
+      otp_release: 18.0
+    - elixir: 1.1.1
+      otp_release: 18.1
 
 env:
   matrix:
