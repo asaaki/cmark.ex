@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Compile.Cmark do
     if error_code != 0 do
       raise Mix.Error, message: """
         Could not run `make`.
-        Please check if `clang`/`gcc` (and/or `make`) is installed.
+        Please check if `make` and either `clang` or `gcc` are installed
       """
     end
 
