@@ -54,7 +54,7 @@ defmodule Cmark.Mixfile do
 
   defp package do
     [
-      contributors: ["Christoph Grabo"],
+      maintainers:  ["Christoph Grabo"],
       licenses:     ["MIT"],
       links: %{
         "GitHub" => "https://github.com/asaaki/cmark.ex",
