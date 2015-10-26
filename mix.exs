@@ -2,12 +2,21 @@ defmodule Mix.Tasks.Compile.Cmark do
   use Mix.Task
   @shortdoc "Compiles cmark library"
   def run(_) do
-    if Mix.shell.cmd("make") != 0 do
+    if Mix.env != :test, do: File.rm_rf("priv")
+    File.mkdir("priv")
+
+    {result, error_code} = System.cmd("make", [], stderr_to_stdout: true)
+    IO.binwrite(result)
+
+    if error_code != 0 do
       raise Mix.Error, message: """
         Could not run `make`.
-        Please check if `clang`/`gcc` and `cmake` are installed.
+        Please check if `clang`/`gcc` (and/or `make`) is installed.
       """
     end
+
+    Mix.Project.build_structure
+    :ok
   end
 end
 
