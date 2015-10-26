@@ -78,11 +78,11 @@ defmodule Cmark.Mixfile do
   end
 
   defp docs do
-    {ref, 0} = System.cmd("git", ["rev-parse", "--verify", "--quiet", "HEAD"])
     [
-      source_ref: ref,
-      readme:     "README.md",
-      main:       "README"
+      extras:     ["README.md"],
+      main:       "extra-readme",
+      source_ref: "v#{@version}",
+      source_url: "https://github.com/asaaki/cmark.ex"
     ]
   end
 
