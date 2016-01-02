@@ -120,7 +120,7 @@ clean-dirs:
 
 ### DEVELOPMENT
 
-dev-prepare: dev-prebuilt-lib dev-copy-code dev-copy-license dev-spec-dump
+dev-prepare: dev-prebuilt-lib dev-copy-code dev-copy-license dev-spec-dump dev-smart-punct-dump
 
 $(CMARK_SRC_DIR):
 	@mkdir -p $(TMP_DIR)
@@ -162,6 +162,9 @@ dev-smart-punct-dump: $(CMARK_SRC_DIR)
 	--dump-tests | \
 	jq -r -M -S "." > $(CMARK_SMART_PUNCT_JSON) \
 	|| true
+
+dev-clean:
+	@rm -rf $(TMP_DIR)
 
 ### PHONY
 

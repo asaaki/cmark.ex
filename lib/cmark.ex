@@ -11,14 +11,15 @@ defmodule Cmark do
 
   """
 
-  @flags [
-    sourcepos: 1,
-    hardbreaks: 2,
-    normalize: 4,
-    smart: 8,
-    validate_utf8: 16,
-    safe: 32
-  ]
+  # c_src/cmark.h -> CMARK_OPT_*
+  @flags %{
+    sourcepos: 2,        # (1 <<< 1)
+    hardbreaks: 4,       # (1 <<< 2)
+    safe: 16,            # (1 <<< 3)
+    normalize: 256,      # (1 <<< 8)
+    validate_utf8: 512,  # (1 <<< 9)
+    smart: 1024,         # (1 <<< 10)
+  }
 
   @doc """
   Compiles one or more (list) Markdown documents to HTML and returns result.
@@ -112,11 +113,11 @@ defmodule Cmark do
       "<p>en-dash –</p><hr><p>ellipsis…</p>"
 
   """
-  def to_html(data, callback, options) when is_list(data) and is_list(options) do
+  def to_html(data, callback, options) when is_list(data) and is_function(callback) and is_list(options) do
     parse_doc_list(data, callback, options)
   end
 
-  def to_html(data, callback, options) when is_bitstring(data) and is_list(options) do
+  def to_html(data, callback, options) when is_bitstring(data) and is_function(callback) and is_list(options) do
     parse_doc(data, callback, options)
   end
 

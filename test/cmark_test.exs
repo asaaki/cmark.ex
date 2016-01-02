@@ -36,7 +36,7 @@ defmodule CmarkTest do
       } <- @cmark_smart_punct do
     test "Section: »#{section}«, Example: #{example}, Lines: #{start_line}-#{end_line}" do
       real_markdown = unquote(markdown)
-      actual_html   = Cmark.to_html(real_markdown, [ :smart ])
+      actual_html   = Cmark.to_html(real_markdown, [:smart])
       expected_html = unquote(html)
       error_message = """
       MARKDOWN: #{inspect real_markdown}

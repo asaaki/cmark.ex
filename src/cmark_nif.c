@@ -11,6 +11,7 @@
 static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
   ErlNifBinary  markdown_binary;
   ErlNifBinary  output_binary;
+  cmark_node   *doc;
   char         *html;
   size_t        html_len;
   int           options;
@@ -24,6 +25,7 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
   }
 
   if (markdown_binary.size <= 0){
+    enif_release_binary(&markdown_binary);
     const char *empty_string = "";
     const int   empty_len    = strlen(empty_string);
     enif_alloc_binary(empty_len, &output_binary);
@@ -33,12 +35,20 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
 
   enif_get_int(env, argv[1], &options);
 
-  html = cmark_markdown_to_html((const char *)markdown_binary.data, markdown_binary.size, options);
+  doc = cmark_parse_document(
+    (const char *)markdown_binary.data,
+    markdown_binary.size,
+    options
+  );
+  html = cmark_render_html(doc, options);
   html_len = strlen(html);
   enif_release_binary(&markdown_binary);
 
   enif_alloc_binary(html_len, &output_binary);
   strncpy((char*)output_binary.data, html, html_len);
+
+  free(html);
+  cmark_node_free(doc);
 
   return enif_make_binary(env, &output_binary);
 };
