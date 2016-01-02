@@ -31,7 +31,7 @@ end
 defmodule Cmark.Mixfile do
   use Mix.Project
 
-  @version File.read!("VERSION") |> String.strip
+  @version "0.6.0"
 
   def project do
     [
@@ -71,8 +71,7 @@ defmodule Cmark.Mixfile do
         "Makefile",
         "mix.exs",
         "README.md",
-        "src",
-        "VERSION"
+        "src"
       ]
     ]
   end

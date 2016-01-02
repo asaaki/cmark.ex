@@ -49,7 +49,7 @@ CMARK_OPTFLAGS=-DNDEBUG
 
 ### TARGETS
 
-all: version check-cc $(NIF_LIB)
+all: check-cc $(NIF_LIB)
 
 all-dev: dev-prepare all
 
@@ -85,7 +85,7 @@ test: spec
 
 ### PUBLISH
 
-publish: version docs publish-code publish-docs
+publish: docs publish-code publish-docs
 
 publish-code: all
 	@mix hex.publish
@@ -104,9 +104,6 @@ check-cc:
 
 docs:
 	@MIX_ENV=docs mix docs
-
-version:
-	@cat VERSION
 
 ### CLEAN UP
 
