@@ -24,7 +24,7 @@ You need a C compiler like `gcc` or `clang`.
 ### mix.exs
 
 ```elixir
-{ :cmark, "~> 0.5" }
+{ :cmark, "~> 0.6" }
 ```
 
 ## Usage
