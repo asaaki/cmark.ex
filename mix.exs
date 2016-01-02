@@ -49,7 +49,7 @@ defmodule Cmark.Mixfile do
   defp docs do
     [
       extras:     ["README.md"],
-      main:       "extra-readme",
+      main:       "readme",
       source_ref: "v#{@version}",
       source_url: "https://github.com/asaaki/cmark.ex"
     ]

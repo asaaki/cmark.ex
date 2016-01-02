@@ -23,8 +23,10 @@ You need a C compiler like `gcc` or `clang`.
 
 ### mix.exs
 
+Add this to your dependencies:
+
 ```elixir
-{ :cmark, "~> 0.6" }
+{:cmark, "~> 0.6"}
 ```
 
 ## Usage
@@ -73,6 +75,10 @@ callback = fn (html) -> "HTML is #{html |> String.strip}" end
 ["list", "test"] |> Cmark.to_html_each(callback)
 #=> ["HTML is <p>list</p>", "HTML is <p>test</p>"]
 ```
+
+## Documentation
+
+Latest API docs can be found at: <http://hexdocs.pm/cmark/Cmark.html>
 
 ## Licenses
 
