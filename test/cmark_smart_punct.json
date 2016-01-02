@@ -1,0 +1,122 @@
+[
+  {
+    "end_line": 13,
+    "example": 1,
+    "html": "<p>“Hello,” said the spider.\n“‘Shelob’ is my name.”</p>\n",
+    "markdown": "\"Hello,\" said the spider.\n\"'Shelob' is my name.\"\n",
+    "section": "Smart punctuation",
+    "start_line": 7
+  },
+  {
+    "end_line": 19,
+    "example": 2,
+    "html": "<p>‘A’, ‘B’, and ‘C’ are letters.</p>\n",
+    "markdown": "'A', 'B', and 'C' are letters.\n",
+    "section": "Smart punctuation",
+    "start_line": 15
+  },
+  {
+    "end_line": 27,
+    "example": 3,
+    "html": "<p>‘Oak,’ ‘elm,’ and ‘beech’ are names of trees.\nSo is ‘pine.’</p>\n",
+    "markdown": "'Oak,' 'elm,' and 'beech' are names of trees.\nSo is 'pine.'\n",
+    "section": "Smart punctuation",
+    "start_line": 21
+  },
+  {
+    "end_line": 33,
+    "example": 4,
+    "html": "<p>‘He said, “I want to go.”’</p>\n",
+    "markdown": "'He said, \"I want to go.\"'\n",
+    "section": "Smart punctuation",
+    "start_line": 29
+  },
+  {
+    "end_line": 43,
+    "example": 5,
+    "html": "<p>Were you alive in the 70’s?</p>\n",
+    "markdown": "Were you alive in the 70's?\n",
+    "section": "Smart punctuation",
+    "start_line": 39
+  },
+  {
+    "end_line": 49,
+    "example": 6,
+    "html": "<p>Here is some quoted ‘<code>code</code>’ and a “<a href=\"url\">quoted link</a>”.</p>\n",
+    "markdown": "Here is some quoted '`code`' and a \"[quoted link](url)\".\n",
+    "section": "Smart punctuation",
+    "start_line": 45
+  },
+  {
+    "end_line": 59,
+    "example": 7,
+    "html": "<p>’tis the season to be ‘jolly’</p>\n",
+    "markdown": "'tis the season to be 'jolly'\n",
+    "section": "Smart punctuation",
+    "start_line": 55
+  },
+  {
+    "end_line": 67,
+    "example": 8,
+    "html": "<p>‘We’ll use Jane’s boat and John’s truck,’ Jenna said.</p>\n",
+    "markdown": "'We'll use Jane's boat and John's truck,' Jenna said.\n",
+    "section": "Smart punctuation",
+    "start_line": 63
+  },
+  {
+    "end_line": 79,
+    "example": 9,
+    "html": "<p>“A paragraph with no closing quote.</p>\n<p>“Second paragraph by same speaker, in fiction.”</p>\n",
+    "markdown": "\"A paragraph with no closing quote.\n\n\"Second paragraph by same speaker, in fiction.\"\n",
+    "section": "Smart punctuation",
+    "start_line": 72
+  },
+  {
+    "end_line": 92,
+    "example": 10,
+    "html": "<p>&quot;This is not smart.&quot;\nThis isn't either.\n5'8&quot;</p>\n",
+    "markdown": "\\\"This is not smart.\\\"\nThis isn\\'t either.\n5\\'8\\\"\n",
+    "section": "Smart punctuation",
+    "start_line": 84
+  },
+  {
+    "end_line": 108,
+    "example": 11,
+    "html": "<p>Some dashes:  em—em\nen–en\nem — em\nen – en\n2–3</p>\n",
+    "markdown": "Some dashes:  em---em\nen--en\nem --- em\nen -- en\n2--3\n",
+    "section": "Smart punctuation",
+    "start_line": 96
+  },
+  {
+    "end_line": 143,
+    "example": 12,
+    "html": "<p>one-\ntwo–\nthree—\nfour––\nfive—–\nsix——\nseven—––\neight––––\nnine———\nthirteen———––.</p>\n",
+    "markdown": "one-\ntwo--\nthree---\nfour----\nfive-----\nsix------\nseven-------\neight--------\nnine---------\nthirteen-------------.\n",
+    "section": "Smart punctuation",
+    "start_line": 121
+  },
+  {
+    "end_line": 151,
+    "example": 13,
+    "html": "<p>Escaped hyphens: -- ---.</p>\n",
+    "markdown": "Escaped hyphens: \\-- \\-\\-\\-.\n",
+    "section": "Smart punctuation",
+    "start_line": 147
+  },
+  {
+    "end_line": 159,
+    "example": 14,
+    "html": "<p>Ellipses…and…and….</p>\n",
+    "markdown": "Ellipses...and...and....\n",
+    "section": "Smart punctuation",
+    "start_line": 155
+  },
+  {
+    "end_line": 168,
+    "example": 15,
+    "html": "<p>No ellipses...</p>\n",
+    "markdown": "No ellipses\\.\\.\\.\n",
+    "section": "Smart punctuation",
+    "start_line": 164
+  }
+]

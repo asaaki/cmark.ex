@@ -25,8 +25,10 @@ CMARK_BUILD_DIR=$(CMARK_SRC_DIR)/build
 PYTHON=python3
 CMARK_SPECS_DIR=$(CMARK_SRC_DIR)/test
 CMARK_SPECS_FILE=$(CMARK_SPECS_DIR)/spec.txt
+CMARK_SMART_PUNCT_FILE=$(CMARK_SPECS_DIR)/smart_punct.txt
 CMARK_SPECS_RUNNER=$(CMARK_SPECS_DIR)/spec_tests.py
 CMARK_SPECS_JSON=$(TEST_DIR)/$(CMARK)_specs.json
+CMARK_SMART_PUNCT_JSON=$(TEST_DIR)/$(CMARK)_smart_punct.json
 
 C_SRC_DIR=c_src
 C_SRC_C_FILES=$(sort $(wildcard $(C_SRC_DIR)/*.c))
@@ -75,7 +77,7 @@ $(CMARK):
 
 ### TEST
 
-spec: all $(CMARK_SPECS_JSON)
+spec: all $(CMARK_SPECS_JSON) $(CMARK_SMART_PUNCT_JSON)
 	@mix deps.get
 	@mix test
 
@@ -145,12 +147,20 @@ dev-prebuilt-lib: $(CMARK_SRC_DIR)
 dev-build-objects: dev-copy-code build-objects
 
 $(CMARK_SPECS_JSON): dev-spec-dump
+$(CMARK_SMART_PUNCT_JSON): dev-smart-punct-dump
 
 dev-spec-dump: $(CMARK_SRC_DIR)
 	@$(PYTHON) $(CMARK_SPECS_RUNNER) \
 	--spec $(CMARK_SPECS_FILE) \
 	--dump-tests | \
 	jq -r -M -S "." > $(CMARK_SPECS_JSON) \
+	|| true
+
+dev-smart-punct-dump: $(CMARK_SRC_DIR)
+	@$(PYTHON) $(CMARK_SPECS_RUNNER) \
+	--spec $(CMARK_SMART_PUNCT_FILE) \
+	--dump-tests | \
+	jq -r -M -S "." > $(CMARK_SMART_PUNCT_JSON) \
 	|| true
 
 ### PHONY

@@ -13,9 +13,9 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
   ErlNifBinary  output_binary;
   char         *html;
   size_t        html_len;
-  int           options = 0;
+  int           options;
 
-  if (argc != 1) {
+  if (argc != 2) {
     return enif_make_badarg(env);
   }
 
@@ -31,6 +31,8 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
     return enif_make_binary(env, &output_binary);
   }
 
+  enif_get_int(env, argv[1], &options);
+
   html = cmark_markdown_to_html((const char *)markdown_binary.data, markdown_binary.size, options);
   html_len = strlen(html);
   enif_release_binary(&markdown_binary);
@@ -42,7 +44,7 @@ static ERL_NIF_TERM to_html_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
 };
 
 static ErlNifFunc nif_funcs[] = {
-  { "to_html", 1, to_html_nif }
+  { "to_html", 2, to_html_nif }
 };
 
 ERL_NIF_INIT(Elixir.Cmark.Nif, nif_funcs, NULL, NULL, NULL, NULL);
