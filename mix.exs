@@ -29,7 +29,7 @@ defmodule Cmark.Mixfile do
       links: %{
         "GitHub" => "https://github.com/asaaki/cmark.ex",
         "Issues" => "https://github.com/asaaki/cmark.ex/issues",
-        "Docs"   => "http://hexdocs.pm/cmark/"
+        "Docs"   => "http://hexdocs.pm/cmark/#{@version}/"
       },
       files: [
         "c_src/*.h",
