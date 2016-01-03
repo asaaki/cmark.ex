@@ -165,6 +165,6 @@ defmodule Cmark do
 
 
   defp parse_options(options) do
-    Enum.reduce(options, 0, fn(flag, acc) -> @flags[flag] + acc end)
+    Enum.reduce(options, 0, fn(flag, acc) -> (@flags[flag] || 0) + acc end)
   end
 end
