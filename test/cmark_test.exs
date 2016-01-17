@@ -1,6 +1,5 @@
 defmodule CmarkTest do
   use ExUnit.Case, async: true
-  doctest Cmark
 
   @cmark_specs File.read!("test/cmark_specs.json") |> Poison.decode!(keys: :atoms)
 
