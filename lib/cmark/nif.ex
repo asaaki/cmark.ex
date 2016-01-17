@@ -26,7 +26,7 @@ defmodule Cmark.Nif do
   end
 
   @doc false
-  def to_html(_, _) do
+  def render(_, _, _) do
     exit(:nif_library_not_loaded)
   end
 end
