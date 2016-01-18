@@ -97,8 +97,16 @@ static ERL_NIF_TERM render(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) 
   return enif_make_binary(env, &output_binary);
 };
 
+int reload(ErlNifEnv* _env, void** _priv_data, ERL_NIF_TERM _load_info) {
+  return 0;
+};
+
+int upgrade(ErlNifEnv* _env, void** _priv_data, void** _old_priv_data, ERL_NIF_TERM _load_info) {
+  return 0;
+};
+
 static ErlNifFunc nif_funcs[] = {
   { "render", 3, render }
 };
 
-ERL_NIF_INIT(Elixir.Cmark.Nif, nif_funcs, NULL, NULL, NULL, NULL);
+ERL_NIF_INIT(Elixir.Cmark.Nif, nif_funcs, NULL, reload, upgrade, NULL)
