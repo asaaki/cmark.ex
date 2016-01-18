@@ -11,7 +11,7 @@ defmodule Cmark.Mixfile do
       compilers:     [:cmark, :elixir, :app],
       deps:          deps,
       package:       package,
-      description:   "Elixir NIF for cmark (C), a parser library following the CommonMark spec, a compatible implementation of Markdown.",
+      description:   description,
       name:          "cmark",
       source_url:    "https://github.com/asaaki/cmark.ex",
       homepage_url:  "http://hexdocs.pm/cmark",
@@ -21,6 +21,13 @@ defmodule Cmark.Mixfile do
   end
 
   def application, do: []
+
+  defp description do
+    """
+    Elixir NIF for cmark (C), a parser library following the CommonMark spec,
+    a compatible implementation of Markdown.
+    """
+  end
 
   defp package do
     [
