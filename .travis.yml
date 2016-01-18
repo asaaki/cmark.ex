@@ -25,4 +25,5 @@ after_success:
 
 after_script:
   - MIX_ENV=docs mix inch.report
-  - mix credo --strict
+  - MIX_ENV=lint mix dogma
+  - MIX_ENV=lint mix credo --strict
