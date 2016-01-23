@@ -83,6 +83,12 @@ spec: all $(CMARK_SPECS_JSON) $(CMARK_SMART_PUNCT_JSON)
 
 test: spec
 
+### LINT
+
+lint:
+	MIX_ENV=lint mix dogma
+	MIX_ENV=lint mix credo --strict
+
 ### PUBLISH
 
 publish: docs publish-code publish-docs
