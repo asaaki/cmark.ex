@@ -1,7 +1,7 @@
 defmodule Cmark.Mixfile do
   use Mix.Project
 
-  @version "0.6.6"
+  @version "0.6.7"
 
   def project do
     [
