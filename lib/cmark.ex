@@ -48,10 +48,27 @@ defmodule Cmark do
 
   """
 
+  @typedoc "List of strings"
+  @type string_list :: [String.t]
+
+  @typedoc "Either a string or a list of strings"
+  @type string_or_list :: String.t | string_list
+
+  @typedoc "A callback function which can return anything"
+  @type callback_fun :: (function -> any)
+
+  @typedoc "List of atoms (see `Cmark.Parser` @flags attribute)"
+  @type options_list :: [atom]
+
+  @typedoc "Either an options list or a callback function"
+  @type options_or_callback :: options_list | callback_fun
+
   ##### HTML #####
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to HTML and returns result.
+
+  - `data` is either a string or a list
 
   ## Examples
 
@@ -62,12 +79,16 @@ defmodule Cmark do
       ["<p>test 1</p>\n", "<p>test 2</p>\n"]
 
   """
+  @spec to_html(string_or_list) :: string_or_list
   def to_html(data),
     do: Parser.parse(:html, data)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to HTML using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. Available options are:
 
@@ -107,12 +128,17 @@ defmodule Cmark do
       "<p>list</p><hr><p>test</p>"
 
   """
+  @spec to_html(string_or_list, options_or_callback) :: string_or_list
   def to_html(data, options_or_callback),
     do: Parser.parse(:html, data, options_or_callback)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to HTML using provided options
   and calls function with result.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -127,11 +153,15 @@ defmodule Cmark do
       "<p>en-dash –</p><hr><p>ellipsis…</p>"
 
   """
+  @spec to_html(string_or_list, callback_fun, options_list) :: string_or_list
   def to_html(data, callback, options),
     do: Parser.parse(:html, data, callback, options)
 
   @doc ~S"""
   Compiles a list of Markdown documents to HTML and calls function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
 
   ## Examples
 
@@ -140,12 +170,17 @@ defmodule Cmark do
       ["HTML is <p>list</p>", "HTML is <p>test</p>"]
 
   """
+  @spec to_html_each(string_or_list, callback_fun) :: list
   def to_html_each(data, callback),
     do: Parser.parse_each(:html, data, callback)
 
   @doc ~S"""
   Compiles a list of Markdown documents to HTML using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -154,6 +189,7 @@ defmodule Cmark do
       ["HTML is <p>list –</p>", "HTML is <p>test…</p>"]
 
   """
+  @spec to_html_each(string_or_list, callback_fun, options_list) :: list
   def to_html_each(data, callback, options),
     do: Parser.parse_each(:html, data, callback, options)
 
@@ -161,6 +197,8 @@ defmodule Cmark do
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to XML and returns result.
+
+  - `data` is either a string or a list
 
   ## Examples
 
@@ -178,12 +216,16 @@ defmodule Cmark do
       </document>\n"]
 
   """
+  @spec to_xml(string_or_list) :: string_or_list
   def to_xml(data),
     do: Parser.parse(:xml, data)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to XML using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_xml/2`.
 
@@ -226,12 +268,17 @@ defmodule Cmark do
       </document>"
 
   """
+  @spec to_xml(string_or_list, options_or_callback) :: string_or_list
   def to_xml(data, options_or_callback),
     do: Parser.parse(:xml, data, options_or_callback)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to XML using provided options
   and calls function with result.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -255,11 +302,15 @@ defmodule Cmark do
         </paragraph>\n</document>"
 
   """
+  @spec to_xml(string_or_list, callback_fun, options_list) :: string_or_list
   def to_xml(data, callback, options),
     do: Parser.parse(:xml, data, callback, options)
 
   @doc ~S"""
   Compiles a list of Markdown documents to XML and calls function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
 
   ## Examples
 
@@ -273,12 +324,17 @@ defmodule Cmark do
       </document>"]
 
   """
+  @spec to_xml_each(string_or_list, callback_fun) :: list
   def to_xml_each(data, callback),
     do: Parser.parse_each(:xml, data, callback)
 
   @doc ~S"""
   Compiles a list of Markdown documents to XML using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -292,6 +348,7 @@ defmodule Cmark do
         </paragraph>\n</document>"]
 
   """
+  @spec to_xml_each(string_or_list, callback_fun, options_list) :: list
   def to_xml_each(data, callback, options),
     do: Parser.parse_each(:xml, data, callback, options)
 
@@ -299,6 +356,8 @@ defmodule Cmark do
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to Manpage and returns result.
+
+  - `data` is either a string or a list
 
   ## Examples
 
@@ -309,12 +368,16 @@ defmodule Cmark do
       [".PP\ntest 1\n", ".PP\ntest 2\n"]
 
   """
+  @spec to_man(string_or_list) :: string_or_list
   def to_man(data),
     do: Parser.parse(:man, data)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to Manpage using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_man/2`.
 
@@ -342,6 +405,7 @@ defmodule Cmark do
       iex> Cmark.to_man(["list", "test"], callback)
       ".PP\nlist%%joiner%%.PP\ntest"
   """
+  @spec to_man(string_or_list, options_or_callback) :: string_or_list
   def to_man(data, options_or_callback),
     do: Parser.parse(:man, data, options_or_callback)
 
@@ -349,7 +413,15 @@ defmodule Cmark do
   Compiles one or more (list) Markdown documents to Manpage using provided options
   and calls function with result.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
+
   ## Examples
+
+      iex> callback = fn (result) -> {:ok, result} end
+      iex> Cmark.to_man(~s(Something "smart" and ... ---you get it!), callback, [:smart])
+      {:ok, ".PP\nSomething \\[lq]smart\\[rq] and … \\[em]you get it!\n"}
 
       iex> callback = fn (results) ->
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("%%joiner%%")
@@ -358,29 +430,34 @@ defmodule Cmark do
       ".PP\nen\\-dash \\[en]%%joiner%%.PP\nellipsis…"
 
   """
+  @spec to_man(string_or_list, callback_fun, options_list) :: string_or_list
   def to_man(data, callback, options),
     do: Parser.parse(:man, data, callback, options)
 
   @doc ~S"""
   Compiles a list of Markdown documents to Manpage and calls function for each item.
 
-  ## Examples
+  - `data` is either a string or a list
+  - `callback` is a callback function
 
-      iex> callback = fn (result) -> {:ok, result} end
-      iex> Cmark.to_man(~s(Something "smart" and ... ---you get it!), callback, [:smart])
-      {:ok, ".PP\nSomething \\[lq]smart\\[rq] and … \\[em]you get it!\n"}
+  ## Examples
 
       iex> callback = fn (result) -> "Manpage is #{result |> String.strip}" end
       iex> Cmark.to_man_each(["list", "test"], callback)
       ["Manpage is .PP\nlist", "Manpage is .PP\ntest"]
 
   """
+  @spec to_man_each(string_or_list, callback_fun) :: list
   def to_man_each(data, callback),
     do: Parser.parse_each(:man, data, callback)
 
   @doc ~S"""
   Compiles a list of Markdown documents to Manpage using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -389,6 +466,7 @@ defmodule Cmark do
       ["Manpage is .PP\nlist \\[en]", "Manpage is .PP\ntest…"]
 
   """
+  @spec to_man_each(string_or_list, callback_fun, options_list) :: list
   def to_man_each(data, callback, options),
     do: Parser.parse_each(:man, data, callback, options)
 
@@ -396,6 +474,8 @@ defmodule Cmark do
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to CommonMark and returns result.
+
+  - `data` is either a string or a list
 
   ## Examples
 
@@ -406,12 +486,16 @@ defmodule Cmark do
       ["test 1\n", "test 2\n"]
 
   """
+  @spec to_commonmark(string_or_list) :: string_or_list
   def to_commonmark(data),
     do: Parser.parse(:commonmark, data)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to CommonMark using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_commonmark/2`.
 
@@ -439,12 +523,17 @@ defmodule Cmark do
       iex> Cmark.to_commonmark(["list", "test"], callback)
       "list%%joiner%%test"
   """
+  @spec to_commonmark(string_or_list, options_or_callback) :: string_or_list
   def to_commonmark(data, options_or_callback),
     do: Parser.parse(:commonmark, data, options_or_callback)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to CommonMark using provided options
   and calls function with result.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -459,11 +548,15 @@ defmodule Cmark do
       "en-dash –%%joiner%%ellipsis…"
 
   """
+  @spec to_commonmark(string_or_list, callback_fun, options_list) :: string_or_list
   def to_commonmark(data, callback, options),
     do: Parser.parse(:commonmark, data, callback, options)
 
   @doc ~S"""
   Compiles a list of Markdown documents to CommonMark and calls function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
 
   ## Examples
 
@@ -472,12 +565,17 @@ defmodule Cmark do
       ["CommonMark is list", "CommonMark is test"]
 
   """
+  @spec to_commonmark_each(string_or_list, callback_fun) :: list
   def to_commonmark_each(data, callback),
     do: Parser.parse_each(:commonmark, data, callback)
 
   @doc ~S"""
   Compiles a list of Markdown documents to CommonMark using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -486,6 +584,7 @@ defmodule Cmark do
       ["CommonMark is list –", "CommonMark is test…"]
 
   """
+  @spec to_commonmark_each(string_or_list, callback_fun, options_list) :: list
   def to_commonmark_each(data, callback, options),
     do: Parser.parse_each(:commonmark, data, callback, options)
 
@@ -493,6 +592,8 @@ defmodule Cmark do
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to LaTeX and returns result.
+
+  - `data` is either a string or a list
 
   ## Examples
 
@@ -503,12 +604,16 @@ defmodule Cmark do
       ["test 1\n", "test 2\n"]
 
   """
+  @spec to_latex(string_or_list) :: string_or_list
   def to_latex(data),
     do: Parser.parse(:latex, data)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to LaTeX using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_latex/2`.
 
@@ -536,12 +641,17 @@ defmodule Cmark do
       iex> Cmark.to_latex(["list", "test"], callback)
       "list%%joiner%%test"
   """
+  @spec to_latex(string_or_list, options_or_callback) :: string_or_list
   def to_latex(data, options_or_callback),
     do: Parser.parse(:latex, data, options_or_callback)
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to LaTeX using provided options
   and calls function with result.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -556,11 +666,15 @@ defmodule Cmark do
       "en-dash --%%joiner%%ellipsis\\ldots{}"
 
   """
+  @spec to_latex(string_or_list, callback_fun, options_list) :: string_or_list
   def to_latex(data, callback, options),
     do: Parser.parse(:latex, data, callback, options)
 
   @doc ~S"""
   Compiles a list of Markdown documents to LaTeX and calls function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
 
   ## Examples
 
@@ -569,12 +683,17 @@ defmodule Cmark do
       ["LaTeX is list", "LaTeX is test"]
 
   """
+  @spec to_latex_each(string_or_list, callback_fun) :: list
   def to_latex_each(data, callback),
     do: Parser.parse_each(:latex, data, callback)
 
   @doc ~S"""
   Compiles a list of Markdown documents to LaTeX using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -583,7 +702,7 @@ defmodule Cmark do
       ["LaTeX is list --", "LaTeX is test\\ldots{}"]
 
   """
+  @spec to_latex_each(string_or_list, callback_fun, options_list) :: list
   def to_latex_each(data, callback, options),
     do: Parser.parse_each(:latex, data, callback, options)
-
 end
