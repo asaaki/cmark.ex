@@ -68,6 +68,9 @@ defmodule Cmark do
       iex> Cmark.to_html(~s(Use option to enable "smart" quotes.), [:smart])
       "<p>Use option to enable “smart” quotes.</p>\n"
 
+      iex> Cmark.to_html([~s(Something "smart"), ~s(em---dashed)], [:smart])
+      ["<p>Something “smart”</p>\n", "<p>em—dashed</p>\n"]
+
   -----
 
   Compiles one or more (list) Markdown documents to HTML and calls function with result.
@@ -93,6 +96,10 @@ defmodule Cmark do
   and calls function with result.
 
   ## Examples
+
+      iex> callback = fn (result) -> {:ok, result} end
+      iex> Cmark.to_html(~s(Something "smart" and ... ---you get it!), callback, [:smart])
+      {:ok, "<p>Something “smart” and … —you get it!</p>\n"}
 
       iex> callback = fn (results) ->
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("<hr>")
@@ -169,6 +176,14 @@ defmodule Cmark do
           <text>“</text>\n    <text>smart</text>\n    <text>”</text>\n    <text> quotes</text>\n    <text>.</text>
         </paragraph>\n</document>\n"
 
+      iex> Cmark.to_xml([~s(Something "smart"), ~s(em---dashed)], [:smart])
+      ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>Something </text>
+          <text>“</text>\n    <text>smart</text>\n    <text>”</text>\n  </paragraph>\n</document>\n",
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>em</text>
+          <text>—</text>\n    <text>dashed</text>\n  </paragraph>\n</document>\n"]
+
   -----
 
   Compiles one or more (list) Markdown documents to XML and calls function with result.
@@ -200,6 +215,14 @@ defmodule Cmark do
   and calls function with result.
 
   ## Examples
+
+      iex> callback = fn (result) -> {:ok, result} end
+      iex> Cmark.to_xml(~s(Something "smart" and ... ---you get it!), callback, [:smart])
+      {:ok, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>Something </text>
+          <text>“</text>\n    <text>smart</text>\n    <text>”</text>\n    <text> and </text>\n    <text>…</text>
+          <text> </text>\n    <text>—</text>\n    <text>you get it</text>\n    <text>!</text>\n  </paragraph>
+      </document>\n"}
 
       iex> callback = fn (results) ->
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("<joiner>")
@@ -281,6 +304,9 @@ defmodule Cmark do
       iex> Cmark.to_man(~s(Use option to enable "smart" quotes.), [:smart])
       ".PP\nUse option to enable \\[lq]smart\\[rq] quotes.\n"
 
+      iex> Cmark.to_man([~s(Something "smart"), ~s(em---dashed)], [:smart])
+      [".PP\nSomething \\[lq]smart\\[rq]\n", ".PP\nem\\[em]dashed\n"]
+
   -----
 
   Compiles one or more (list) Markdown documents to Manpage and calls function with result.
@@ -320,6 +346,10 @@ defmodule Cmark do
   Compiles a list of Markdown documents to Manpage and calls function for each item.
 
   ## Examples
+
+      iex> callback = fn (result) -> {:ok, result} end
+      iex> Cmark.to_man(~s(Something "smart" and ... ---you get it!), callback, [:smart])
+      {:ok, ".PP\nSomething \\[lq]smart\\[rq] and … \\[em]you get it!\n"}
 
       iex> callback = fn (result) -> "Manpage is #{result |> String.strip}" end
       iex> Cmark.to_man_each(["list", "test"], callback)
@@ -371,6 +401,9 @@ defmodule Cmark do
       iex> Cmark.to_commonmark(~s(Use option to enable "smart" quotes.), [:smart])
       "Use option to enable “smart” quotes.\n"
 
+      iex> Cmark.to_commonmark([~s(Something "smart"), ~s(em---dashed)], [:smart])
+      ["Something “smart”\n", "em—dashed\n"]
+
   -----
 
   Compiles one or more (list) Markdown documents to CommonMark and calls function with result.
@@ -395,6 +428,10 @@ defmodule Cmark do
   and calls function with result.
 
   ## Examples
+
+      iex> callback = fn (result) -> {:ok, result} end
+      iex> Cmark.to_commonmark(~s(Something "smart" and ... ---you get it!), callback, [:smart])
+      {:ok, "Something “smart” and … —you get it\\!\n"}
 
       iex> callback = fn (results) ->
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("%%joiner%%")
@@ -461,6 +498,9 @@ defmodule Cmark do
       iex> Cmark.to_latex(~s(Use option to enable "smart" quotes.), [:smart])
       "Use option to enable ``smart'' quotes.\n"
 
+      iex> Cmark.to_latex([~s(Something "smart"), ~s(em---dashed)], [:smart])
+      ["Something ``smart''\n", "em---dashed\n"]
+
   -----
 
   Compiles one or more (list) Markdown documents to LaTeX and calls function with result.
@@ -485,6 +525,10 @@ defmodule Cmark do
   and calls function with result.
 
   ## Examples
+
+      iex> callback = fn (result) -> {:ok, result} end
+      iex> Cmark.to_latex(~s(Something "smart" and ... ---you get it!), callback, [:smart])
+      {:ok, "Something ``smart'' and \\ldots{} ---you get it!\n"}
 
       iex> callback = fn (results) ->
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("%%joiner%%")
