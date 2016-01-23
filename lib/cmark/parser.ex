@@ -2,12 +2,14 @@ defmodule Cmark.Parser do
   @moduledoc """
   Generic interface for parsing Markdown/CommonMark inputs
   into different outputs.
+
+  _(Detailed documentation omitted on purpose.)_
   """
 
   alias Cmark.Nif
 
-  @type format_atom :: :html | :xml | :man | :commonmark | :latex
-  @type format_id :: 1 | 2 | 3 | 4 | 5
+  @typep format_atom :: :html | :xml | :man | :commonmark | :latex
+  @typep format_id :: 1 | 2 | 3 | 4 | 5
 
   @doc false
   @spec parse(format_atom, Cmark.string_or_list) :: Cmark.string_or_list

@@ -57,7 +57,23 @@ defmodule Cmark do
   @typedoc "A callback function which can return anything"
   @type callback_fun :: (function -> any)
 
-  @typedoc "List of atoms (see `Cmark.Parser` @flags attribute)"
+  @options_doc """
+  Available options are:
+
+  - `:sourcepos` - Include a `data-sourcepos` attribute on all block elements.
+  - `:softbreak` - Render `softbreak` elements as hard line breaks.
+  - `:normalize` - Normalize tree by consolidating adjacent text nodes.
+  - `:smart` - Convert straight quotes to curly, --- to em dashes, -- to en dashes.
+  - `:validate_utf8` - Validate UTF-8 in the input before parsing, replacing
+     illegal sequences with the replacement character U+FFFD.
+  - `:safe` - Suppress raw HTML and unsafe links (`javascript:`, `vbscript:`,
+    `file:`, and `data:`, except for `image/png`, `image/gif`, `image/jpeg`, or
+    `image/webp` mime types).  Raw HTML is replaced by a placeholder HTML
+    comment. Unsafe links are replaced by empty strings.
+  """
+
+  @typedoc "A list of atoms describing the options to use
+            (for details check documentation of any function using options)"
   @type options_list :: [atom]
 
   @typedoc "Either an options list or a callback function"
@@ -90,18 +106,7 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `options_or_callback` is either an option list or a callback function
 
-  Options are passed as a list of atoms. Available options are:
-
-  * `:sourcepos` - Include a `data-sourcepos` attribute on all block elements.
-  * `:softbreak` - Render `softbreak` elements as hard line breaks.
-  * `:normalize` - Normalize tree by consolidating adjacent text nodes.
-  * `:smart` - Convert straight quotes to curly, --- to em dashes, -- to en dashes.
-  * `:validate_utf8` - Validate UTF-8 in the input before parsing, replacing
-     illegal sequences with the replacement character U+FFFD.
-  * `:safe` - Suppress raw HTML and unsafe links (`javascript:`, `vbscript:`,
-    `file:`, and `data:`, except for `image/png`, `image/gif`, `image/jpeg`, or
-    `image/webp` mime types).  Raw HTML is replaced by a placeholder HTML
-    comment. Unsafe links are replaced by empty strings.
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -139,6 +144,8 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `callback` is a callback function
   - `options` is an option list
+
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -181,6 +188,8 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `callback` is a callback function
   - `options` is an option list
+
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -227,7 +236,7 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `options_or_callback` is either an option list or a callback function
 
-  Options are passed as a list of atoms. For details see `Cmark.to_xml/2`.
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -279,6 +288,8 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `callback` is a callback function
   - `options` is an option list
+
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -336,6 +347,8 @@ defmodule Cmark do
   - `callback` is a callback function
   - `options` is an option list
 
+  """ <> @options_doc <> ~S"""
+
   ## Examples
 
       iex> callback = fn (result) -> "XML is #{result |> String.strip}" end
@@ -379,7 +392,7 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `options_or_callback` is either an option list or a callback function
 
-  Options are passed as a list of atoms. For details see `Cmark.to_man/2`.
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -416,6 +429,8 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `callback` is a callback function
   - `options` is an option list
+
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -459,6 +474,8 @@ defmodule Cmark do
   - `callback` is a callback function
   - `options` is an option list
 
+  """ <> @options_doc <> ~S"""
+
   ## Examples
 
       iex> callback = fn (result) -> "Manpage is #{result |> String.strip}" end
@@ -497,7 +514,7 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `options_or_callback` is either an option list or a callback function
 
-  Options are passed as a list of atoms. For details see `Cmark.to_commonmark/2`.
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -534,6 +551,8 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `callback` is a callback function
   - `options` is an option list
+
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -577,6 +596,8 @@ defmodule Cmark do
   - `callback` is a callback function
   - `options` is an option list
 
+  """ <> @options_doc <> ~S"""
+
   ## Examples
 
       iex> callback = fn (result) -> "CommonMark is #{result |> String.strip}" end
@@ -615,7 +636,7 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `options_or_callback` is either an option list or a callback function
 
-  Options are passed as a list of atoms. For details see `Cmark.to_latex/2`.
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -652,6 +673,8 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `callback` is a callback function
   - `options` is an option list
+
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
@@ -694,6 +717,8 @@ defmodule Cmark do
   - `data` is either a string or a list
   - `callback` is a callback function
   - `options` is an option list
+
+  """ <> @options_doc <> ~S"""
 
   ## Examples
 
