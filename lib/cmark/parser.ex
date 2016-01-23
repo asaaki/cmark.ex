@@ -1,4 +1,9 @@
 defmodule Cmark.Parser do
+  @moduledoc """
+  Generic interface for parsing Markdown/CommonMark inputs
+  into different outputs.
+  """
+
   alias Cmark.Nif
 
   @doc false

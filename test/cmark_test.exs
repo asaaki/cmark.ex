@@ -1,7 +1,7 @@
 defmodule CmarkTest do
   use ExUnit.Case, async: true
 
-  @cmark_specs File.read!("test/cmark_specs.json") |> Poison.decode!(keys: :atoms)
+  @cmark_specs "test/cmark_specs.json" |> File.read! |> Poison.decode!(keys: :atoms)
 
   for %{
         section: section,
@@ -24,7 +24,8 @@ defmodule CmarkTest do
     end
   end
 
-  @cmark_smart_punct File.read!("test/cmark_smart_punct.json") |> Poison.decode!(keys: :atoms)
+  @cmark_smart_punct "test/cmark_smart_punct.json" |> File.read! |> Poison.decode!(keys: :atoms)
+
   for %{
         section: section,
         example: example,

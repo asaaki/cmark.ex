@@ -18,10 +18,12 @@ env:
 
 before_install:
   - kerl list installations
-
-after_script:
-  - MIX_ENV=docs mix inch.report
+  - export MIX_ENV=ci
 
 after_success:
-  - mix compile
   - mix coveralls.travis
+
+after_script:
+  - mix inch.report
+  - mix dogma
+  - mix credo --strict

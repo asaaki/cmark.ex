@@ -139,11 +139,17 @@ defmodule Cmark do
   ## Examples
 
       iex> "test" |> Cmark.to_xml
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>\n</document>\n"
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>
+      </document>\n"
 
       iex> ["test 1", "test 2"] |> Cmark.to_xml
-      ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test 1</text>\n  </paragraph>\n</document>\n",
-       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test 2</text>\n  </paragraph>\n</document>\n"]
+      ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test 1</text>\n  </paragraph>
+      </document>\n",
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test 2</text>\n  </paragraph>
+      </document>\n"]
 
   """
   def to_xml(data),
@@ -158,7 +164,10 @@ defmodule Cmark do
   ## Examples
 
       iex> Cmark.to_xml(~s(Use option to enable "smart" quotes.), [:smart])
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>Use option to enable </text>\n    <text>“</text>\n    <text>smart</text>\n    <text>”</text>\n    <text> quotes</text>\n    <text>.</text>\n  </paragraph>\n</document>\n"
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>Use option to enable </text>
+          <text>“</text>\n    <text>smart</text>\n    <text>”</text>\n    <text> quotes</text>\n    <text>.</text>
+        </paragraph>\n</document>\n"
 
   -----
 
@@ -168,13 +177,19 @@ defmodule Cmark do
 
       iex> callback = fn (result) -> "XML is #{result}" |> String.strip end
       iex> Cmark.to_xml("test", callback)
-      "XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>\n</document>"
+      "XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>
+      </document>"
 
       iex> callback = fn (results) ->
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("<joiner>")
       iex> end
       iex> Cmark.to_xml(["list", "test"], callback)
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>list</text>\n  </paragraph>\n</document><joiner><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>\n</document>"
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>list</text>\n  </paragraph>
+      </document><joiner><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>
+      </document>"
 
   """
   def to_xml(data, options_or_callback),
@@ -190,7 +205,12 @@ defmodule Cmark do
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("<joiner>")
       iex> end
       iex> Cmark.to_xml(["en-dash --", "ellipsis..."], callback, [:smart])
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>en</text>\n    <text>-</text>\n    <text>dash </text>\n    <text>–</text>\n  </paragraph>\n</document><joiner><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>ellipsis</text>\n    <text>…</text>\n  </paragraph>\n</document>"
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>en</text>\n    <text>-</text>
+          <text>dash </text>\n    <text>–</text>\n  </paragraph>
+      </document><joiner><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>ellipsis</text>\n    <text>…</text>
+        </paragraph>\n</document>"
 
   """
   def to_xml(data, callback, options),
@@ -203,8 +223,12 @@ defmodule Cmark do
 
       iex> callback = fn (result) -> "XML is #{result |> String.strip}" end
       iex> Cmark.to_xml_each(["list", "test"], callback)
-      ["XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>list</text>\n  </paragraph>\n</document>",
-       "XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>\n</document>"]
+      ["XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>list</text>\n  </paragraph>
+      </document>",
+      "XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n  </paragraph>
+      </document>"]
 
   """
   def to_xml_each(data, callback),
@@ -218,8 +242,12 @@ defmodule Cmark do
 
       iex> callback = fn (result) -> "XML is #{result |> String.strip}" end
       iex> Cmark.to_xml_each(["list --", "test..."], callback, [:smart])
-      ["XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>list </text>\n    <text>–</text>\n  </paragraph>\n</document>",
-       "XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n    <text>…</text>\n  </paragraph>\n</document>"]
+      ["XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>list </text>\n    <text>–</text>
+        </paragraph>\n</document>",
+      "XML is <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">
+      <document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text>test</text>\n    <text>…</text>
+        </paragraph>\n</document>"]
 
   """
   def to_xml_each(data, callback, options),

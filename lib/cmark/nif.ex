@@ -1,5 +1,6 @@
 defmodule Cmark.Nif do
-  @on_load { :init, 0 }
+  @on_load {:init, 0}
+
   @moduledoc """
   NIF module
 
@@ -14,16 +15,19 @@ defmodule Cmark.Nif do
   end
 
   defp priv_dir do
-    case :code.priv_dir(:cmark) do
-      {:error, _} ->
-        :code.which(:cmark)
-        |> :filename.dirname
-        |> :filename.dirname
-        |> :filename.join('priv')
-      path ->
-        path
-    end
+    :cmark
+    |> :code.priv_dir
+    |> maybe_priv_dir
   end
+
+  defp maybe_priv_dir({:error, _}) do
+    :cmark
+    |> :code.which
+    |> :filename.dirname
+    |> :filename.dirname
+    |> :filename.join('priv')
+  end
+  defp maybe_priv_dir(path), do: path
 
   @doc false
   def render(_, _, _) do
