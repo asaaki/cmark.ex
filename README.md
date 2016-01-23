@@ -76,6 +76,15 @@ callback = fn (html) -> "HTML is #{html |> String.strip}" end
 #=> ["HTML is <p>list</p>", "HTML is <p>test</p>"]
 ```
 
+### Other output formats
+
+Thanks to the [cmark project](https://github.com/jgm/cmark) this library also supports further output formats:
+
+- XML: `Cmark.to_xml/1,2,3`, `Cmark.to_xml_each/2`
+- Manpage: `Cmark.to_man/1,2,3`, `Cmark.to_man_each/2`
+- CommonMark: `Cmark.to_commonmark/1,2,3`, `Cmark.to_commonmark_each/2`
+- LaTeX: `Cmark.to_latex/1,2,3`, `Cmark.to_latex_each/2`
+
 ## Documentation
 
 Latest API docs can be found at: <http://hexdocs.pm/cmark/0.6.2/Cmark.html>
