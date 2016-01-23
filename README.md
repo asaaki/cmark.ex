@@ -38,52 +38,28 @@ Cmark.to_html "a markdown string"
 #=> "<p>a markdown string</p>\n"
 ```
 
-### Cmark.to_html/1
+### Available functions
 
-```elixir
-"test" |> Cmark.to_html
-#=> "<p>test</p>\n"
-```
-
-```elixir
-["# also works", "* with list", "`of documents`"] |> Cmark.to_html
-#=> ["<h1>also works</h1>\n",
-#    "<ul>\n<li>with list</li>\n</ul>\n",
-#    "<p><code>of documents</code></p>\n"]
-```
-
-### Cmark.to_html/2
-
-```elixir
-callback = fn (html) -> "HTML is #{html}" |> String.strip end
-"test" |> Cmark.to_html(callback)
-#=> "HTML is <p>test</p>"
-```
-
-```elixir
-callback = fn (htmls) ->
- Enum.map(htmls, &String.strip/1) |> Enum.join("<hr>")
-end
-["list", "test"] |> Cmark.to_html(callback)
-#=> "<p>list</p><hr><p>test</p>"
-```
-
-### Cmark.to_html_each/2
-
-```elixir
-callback = fn (html) -> "HTML is #{html |> String.strip}" end
-["list", "test"] |> Cmark.to_html_each(callback)
-#=> ["HTML is <p>list</p>", "HTML is <p>test</p>"]
-```
-
-### Other output formats
-
-Thanks to the [cmark project](https://github.com/jgm/cmark) this library also supports further output formats:
-
-- XML: `Cmark.to_xml/1,2,3`, `Cmark.to_xml_each/2`
-- Manpage: `Cmark.to_man/1,2,3`, `Cmark.to_man_each/2`
-- CommonMark: `Cmark.to_commonmark/1,2,3`, `Cmark.to_commonmark_each/2`
-- LaTeX: `Cmark.to_latex/1,2,3`, `Cmark.to_latex_each/2`
+- `Cmark.to_html/1`
+- `Cmark.to_html/2`
+- `Cmark.to_html/3`
+- `Cmark.to_html_each/3`
+- `Cmark.to_xml/1`
+- `Cmark.to_xml/2`
+- `Cmark.to_xml/3`
+- `Cmark.to_xml_each/3`
+- `Cmark.to_man/1`
+- `Cmark.to_man/2`
+- `Cmark.to_man/3`
+- `Cmark.to_man_each/3`
+- `Cmark.to_commonmark/1`
+- `Cmark.to_commonmark/2`
+- `Cmark.to_commonmark/3`
+- `Cmark.to_commonmark_each/3`
+- `Cmark.to_latex/1`
+- `Cmark.to_latex/2`
+- `Cmark.to_latex/3`
+- `Cmark.to_latex_each/3`
 
 ## Documentation
 
