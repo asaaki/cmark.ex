@@ -40,25 +40,44 @@ Cmark.to_html "a markdown string"
 
 ### Available functions
 
+#### HTML
+
 - `Cmark.to_html/1`
 - `Cmark.to_html/2`
 - `Cmark.to_html/3`
+- `Cmark.to_html_each/2`
 - `Cmark.to_html_each/3`
+
+#### XML
+
 - `Cmark.to_xml/1`
 - `Cmark.to_xml/2`
 - `Cmark.to_xml/3`
+- `Cmark.to_xml_each/2`
 - `Cmark.to_xml_each/3`
+
+#### Manpage
+
 - `Cmark.to_man/1`
 - `Cmark.to_man/2`
 - `Cmark.to_man/3`
+- `Cmark.to_man_each/2`
 - `Cmark.to_man_each/3`
+
+#### CommonMark
+
 - `Cmark.to_commonmark/1`
 - `Cmark.to_commonmark/2`
 - `Cmark.to_commonmark/3`
+- `Cmark.to_commonmark_each/2`
 - `Cmark.to_commonmark_each/3`
+
+#### LaTeX
+
 - `Cmark.to_latex/1`
 - `Cmark.to_latex/2`
 - `Cmark.to_latex/3`
+- `Cmark.to_latex_each/2`
 - `Cmark.to_latex_each/3`
 
 ## Documentation

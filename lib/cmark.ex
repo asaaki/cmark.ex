@@ -6,26 +6,45 @@ defmodule Cmark do
 
   Provides:
 
-  * `to_commonmark/1`
-  * `to_commonmark/2`
-  * `to_commonmark/3`
-  * `to_commonmark_each/3`
-  * `to_html/1`
-  * `to_html/2`
-  * `to_html/3`
-  * `to_html_each/3`
-  * `to_latex/1`
-  * `to_latex/2`
-  * `to_latex/3`
-  * `to_latex_each/3`
-  * `to_man/1`
-  * `to_man/2`
-  * `to_man/3`
-  * `to_man_each/3`
-  * `to_xml/1`
-  * `to_xml/2`
-  * `to_xml/3`
-  * `to_xml_each/3`
+  HTML
+
+  - `to_html/1`
+  - `to_html/2`
+  - `to_html/3`
+  - `to_html_each/2`
+  - `to_html_each/3`
+
+  XML
+
+  - `to_xml/1`
+  - `to_xml/2`
+  - `to_xml/3`
+  - `to_xml_each/2`
+  - `to_xml_each/3`
+
+  Manpage
+
+  - `to_man/1`
+  - `to_man/2`
+  - `to_man/3`
+  - `to_man_each/2`
+  - `to_man_each/3`
+
+  CommonMark
+
+  - `to_commonmark/1`
+  - `to_commonmark/2`
+  - `to_commonmark/3`
+  - `to_commonmark_each/2`
+  - `to_commonmark_each/3`
+
+  LaTeX
+
+  - `to_latex/1`
+  - `to_latex/2`
+  - `to_latex/3`
+  - `to_latex_each/2`
+  - `to_latex_each/3`
 
   """
 
