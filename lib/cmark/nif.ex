@@ -9,6 +9,7 @@ defmodule Cmark.Nif do
   """
 
   @doc false
+  @spec init :: :ok
   def init do
     :ok = :erlang.load_nif(nif_path, 0)
   end
@@ -36,7 +37,8 @@ defmodule Cmark.Nif do
     do: path
 
   @doc false
-  def render(_, _, _) do
-    exit(:nif_library_not_loaded)
-  end
+  @spec render(String.t, list, integer) :: String.t
+  def render(data, options, format)
+  def render(_, _, _),
+    do: exit(:nif_library_not_loaded)
 end

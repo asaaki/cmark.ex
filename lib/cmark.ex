@@ -48,6 +48,21 @@ defmodule Cmark do
 
   """
 
+  @typedoc "List of strings"
+  @type string_list :: [String.t]
+
+  @typedoc "Either a string or a list of strings"
+  @type string_or_list :: String.t | string_list
+
+  @typedoc "A callback function which can return anything"
+  @type callback_fun :: (function -> any)
+
+  @typedoc "List of atoms (see `Cmark.Parser` @flags attribute)"
+  @type options_list :: [atom]
+
+  @typedoc "Either an options list or a callback function"
+  @type options_or_callback :: options_list | callback_fun
+
   ##### HTML #####
 
   @doc ~S"""
@@ -64,6 +79,7 @@ defmodule Cmark do
       ["<p>test 1</p>\n", "<p>test 2</p>\n"]
 
   """
+  @spec to_html(string_or_list) :: string_or_list
   def to_html(data),
     do: Parser.parse(:html, data)
 
@@ -112,6 +128,7 @@ defmodule Cmark do
       "<p>list</p><hr><p>test</p>"
 
   """
+  @spec to_html(string_or_list, options_or_callback) :: string_or_list
   def to_html(data, options_or_callback),
     do: Parser.parse(:html, data, options_or_callback)
 
@@ -136,6 +153,7 @@ defmodule Cmark do
       "<p>en-dash –</p><hr><p>ellipsis…</p>"
 
   """
+  @spec to_html(string_or_list, callback_fun, options_list) :: string_or_list
   def to_html(data, callback, options),
     do: Parser.parse(:html, data, callback, options)
 
@@ -152,6 +170,7 @@ defmodule Cmark do
       ["HTML is <p>list</p>", "HTML is <p>test</p>"]
 
   """
+  @spec to_html_each(string_or_list, callback_fun) :: list
   def to_html_each(data, callback),
     do: Parser.parse_each(:html, data, callback)
 
@@ -170,6 +189,7 @@ defmodule Cmark do
       ["HTML is <p>list –</p>", "HTML is <p>test…</p>"]
 
   """
+  @spec to_html_each(string_or_list, callback_fun, options_list) :: list
   def to_html_each(data, callback, options),
     do: Parser.parse_each(:html, data, callback, options)
 
@@ -196,6 +216,7 @@ defmodule Cmark do
       </document>\n"]
 
   """
+  @spec to_xml(string_or_list) :: string_or_list
   def to_xml(data),
     do: Parser.parse(:xml, data)
 
@@ -247,6 +268,7 @@ defmodule Cmark do
       </document>"
 
   """
+  @spec to_xml(string_or_list, options_or_callback) :: string_or_list
   def to_xml(data, options_or_callback),
     do: Parser.parse(:xml, data, options_or_callback)
 
@@ -280,6 +302,7 @@ defmodule Cmark do
         </paragraph>\n</document>"
 
   """
+  @spec to_xml(string_or_list, callback_fun, options_list) :: string_or_list
   def to_xml(data, callback, options),
     do: Parser.parse(:xml, data, callback, options)
 
@@ -301,6 +324,7 @@ defmodule Cmark do
       </document>"]
 
   """
+  @spec to_xml_each(string_or_list, callback_fun) :: list
   def to_xml_each(data, callback),
     do: Parser.parse_each(:xml, data, callback)
 
@@ -324,6 +348,7 @@ defmodule Cmark do
         </paragraph>\n</document>"]
 
   """
+  @spec to_xml_each(string_or_list, callback_fun, options_list) :: list
   def to_xml_each(data, callback, options),
     do: Parser.parse_each(:xml, data, callback, options)
 
@@ -343,6 +368,7 @@ defmodule Cmark do
       [".PP\ntest 1\n", ".PP\ntest 2\n"]
 
   """
+  @spec to_man(string_or_list) :: string_or_list
   def to_man(data),
     do: Parser.parse(:man, data)
 
@@ -379,6 +405,7 @@ defmodule Cmark do
       iex> Cmark.to_man(["list", "test"], callback)
       ".PP\nlist%%joiner%%.PP\ntest"
   """
+  @spec to_man(string_or_list, options_or_callback) :: string_or_list
   def to_man(data, options_or_callback),
     do: Parser.parse(:man, data, options_or_callback)
 
@@ -403,6 +430,7 @@ defmodule Cmark do
       ".PP\nen\\-dash \\[en]%%joiner%%.PP\nellipsis…"
 
   """
+  @spec to_man(string_or_list, callback_fun, options_list) :: string_or_list
   def to_man(data, callback, options),
     do: Parser.parse(:man, data, callback, options)
 
@@ -419,6 +447,7 @@ defmodule Cmark do
       ["Manpage is .PP\nlist", "Manpage is .PP\ntest"]
 
   """
+  @spec to_man_each(string_or_list, callback_fun) :: list
   def to_man_each(data, callback),
     do: Parser.parse_each(:man, data, callback)
 
@@ -437,6 +466,7 @@ defmodule Cmark do
       ["Manpage is .PP\nlist \\[en]", "Manpage is .PP\ntest…"]
 
   """
+  @spec to_man_each(string_or_list, callback_fun, options_list) :: list
   def to_man_each(data, callback, options),
     do: Parser.parse_each(:man, data, callback, options)
 
@@ -456,6 +486,7 @@ defmodule Cmark do
       ["test 1\n", "test 2\n"]
 
   """
+  @spec to_commonmark(string_or_list) :: string_or_list
   def to_commonmark(data),
     do: Parser.parse(:commonmark, data)
 
@@ -492,6 +523,7 @@ defmodule Cmark do
       iex> Cmark.to_commonmark(["list", "test"], callback)
       "list%%joiner%%test"
   """
+  @spec to_commonmark(string_or_list, options_or_callback) :: string_or_list
   def to_commonmark(data, options_or_callback),
     do: Parser.parse(:commonmark, data, options_or_callback)
 
@@ -516,6 +548,7 @@ defmodule Cmark do
       "en-dash –%%joiner%%ellipsis…"
 
   """
+  @spec to_commonmark(string_or_list, callback_fun, options_list) :: string_or_list
   def to_commonmark(data, callback, options),
     do: Parser.parse(:commonmark, data, callback, options)
 
@@ -532,6 +565,7 @@ defmodule Cmark do
       ["CommonMark is list", "CommonMark is test"]
 
   """
+  @spec to_commonmark_each(string_or_list, callback_fun) :: list
   def to_commonmark_each(data, callback),
     do: Parser.parse_each(:commonmark, data, callback)
 
@@ -550,6 +584,7 @@ defmodule Cmark do
       ["CommonMark is list –", "CommonMark is test…"]
 
   """
+  @spec to_commonmark_each(string_or_list, callback_fun, options_list) :: list
   def to_commonmark_each(data, callback, options),
     do: Parser.parse_each(:commonmark, data, callback, options)
 
@@ -569,6 +604,7 @@ defmodule Cmark do
       ["test 1\n", "test 2\n"]
 
   """
+  @spec to_latex(string_or_list) :: string_or_list
   def to_latex(data),
     do: Parser.parse(:latex, data)
 
@@ -605,6 +641,7 @@ defmodule Cmark do
       iex> Cmark.to_latex(["list", "test"], callback)
       "list%%joiner%%test"
   """
+  @spec to_latex(string_or_list, options_or_callback) :: string_or_list
   def to_latex(data, options_or_callback),
     do: Parser.parse(:latex, data, options_or_callback)
 
@@ -629,6 +666,7 @@ defmodule Cmark do
       "en-dash --%%joiner%%ellipsis\\ldots{}"
 
   """
+  @spec to_latex(string_or_list, callback_fun, options_list) :: string_or_list
   def to_latex(data, callback, options),
     do: Parser.parse(:latex, data, callback, options)
 
@@ -645,6 +683,7 @@ defmodule Cmark do
       ["LaTeX is list", "LaTeX is test"]
 
   """
+  @spec to_latex_each(string_or_list, callback_fun) :: list
   def to_latex_each(data, callback),
     do: Parser.parse_each(:latex, data, callback)
 
@@ -663,7 +702,7 @@ defmodule Cmark do
       ["LaTeX is list --", "LaTeX is test\\ldots{}"]
 
   """
+  @spec to_latex_each(string_or_list, callback_fun, options_list) :: list
   def to_latex_each(data, callback, options),
     do: Parser.parse_each(:latex, data, callback, options)
-
 end
