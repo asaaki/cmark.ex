@@ -171,7 +171,7 @@ const char *cmark_node_get_type_string(cmark_node *node) {
   case CMARK_NODE_HTML_BLOCK:
     return "html_block";
   case CMARK_NODE_CUSTOM_BLOCK:
-    return "raw_block";
+    return "custom_block";
   case CMARK_NODE_PARAGRAPH:
     return "paragraph";
   case CMARK_NODE_HEADING:
@@ -189,7 +189,7 @@ const char *cmark_node_get_type_string(cmark_node *node) {
   case CMARK_NODE_HTML_INLINE:
     return "html_inline";
   case CMARK_NODE_CUSTOM_INLINE:
-    return "raw_inline";
+    return "custom_inline";
   case CMARK_NODE_EMPH:
     return "emph";
   case CMARK_NODE_STRONG:
@@ -727,6 +727,14 @@ int cmark_node_insert_after(cmark_node *node, cmark_node *sibling) {
     parent->last_child = sibling;
   }
 
+  return 1;
+}
+
+int cmark_node_replace(cmark_node *oldnode, cmark_node *newnode) {
+  if (!cmark_node_insert_before(oldnode, newnode)) {
+    return 0;
+  }
+  cmark_node_unlink(oldnode);
   return 1;
 }
 
