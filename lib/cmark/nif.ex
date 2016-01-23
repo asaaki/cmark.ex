@@ -38,7 +38,7 @@ defmodule Cmark.Nif do
 
   @doc false
   @spec render(String.t, list, integer) :: String.t
-  def render(data, options, format)
+  # def render(data, options, format)
   def render(_, _, _),
     do: exit(:nif_library_not_loaded)
 end
