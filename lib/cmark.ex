@@ -57,7 +57,11 @@ defmodule Cmark do
   @typedoc "A callback function which can return anything"
   @type callback_fun :: (function -> any)
 
-  @typedoc "List of atoms (see `Cmark.to_html/1` for more information about options)"
+  @typedoc """
+  List of atoms
+
+  For more information about options see `Cmark.to_html/2` or any other function using options.
+  """
   @type options_list :: [atom]
 
   @typedoc "Either an options list or a callback function"
