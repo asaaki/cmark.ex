@@ -1,7 +1,7 @@
 defmodule Cmark.Mixfile do
   use Mix.Project
 
-  @version "0.6.2"
+  @version "0.6.3"
 
   def project do
     [
@@ -64,12 +64,12 @@ defmodule Cmark.Mixfile do
 
   defp deps do
     [
-      {:credo, "~> 0.2", only: [:lint, :ci]},
+      {:credo, "~> 0.3.0-dev", only: [:lint, :ci]},
       {:dogma, "~> 0.0", only: [:lint, :ci]},
       {:ex_doc, "~> 0.11", only: [:docs, :ci]},
       {:excoveralls, "~> 0.4", only: :ci},
-      {:inch_ex, "~> 0.4", only: [:docs, :ci]},
-      {:poison, "~> 1.5", only: [:dev, :test, :docs, :lint, :ci], override: true},
+      {:inch_ex, "~> 0.5", only: [:docs, :ci]},
+      {:poison, "~> 2.0", only: [:dev, :test, :docs, :lint, :ci], override: true},
     ]
   end
 end
