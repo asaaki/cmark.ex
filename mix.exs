@@ -69,7 +69,7 @@ defmodule Cmark.Mixfile do
       {:ex_doc, "~> 0.11", only: [:docs, :ci]},
       {:excoveralls, "~> 0.4", only: :ci},
       {:inch_ex, "~> 0.4", only: [:docs, :ci]},
-      {:poison, "~> 1.5", only: [:docs, :lint, :ci], override: true},
+      {:poison, "~> 1.5", only: [:dev, :test, :docs, :lint, :ci], override: true},
     ]
   end
 end
