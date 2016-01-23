@@ -53,6 +53,8 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to HTML and returns result.
 
+  - `data` is either a string or a list
+
   ## Examples
 
       iex> "test" |> Cmark.to_html
@@ -68,6 +70,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to HTML using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. Available options are:
 
@@ -114,6 +119,10 @@ defmodule Cmark do
   Compiles one or more (list) Markdown documents to HTML using provided options
   and calls function with result.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
+
   ## Examples
 
       iex> callback = fn (result) -> {:ok, result} end
@@ -133,6 +142,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to HTML and calls function for each item.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+
   ## Examples
 
       iex> callback = fn (result) -> "HTML is #{result |> String.strip}" end
@@ -146,6 +158,10 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to HTML using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -161,6 +177,8 @@ defmodule Cmark do
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to XML and returns result.
+
+  - `data` is either a string or a list
 
   ## Examples
 
@@ -184,6 +202,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to XML using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_xml/2`.
 
@@ -233,6 +254,10 @@ defmodule Cmark do
   Compiles one or more (list) Markdown documents to XML using provided options
   and calls function with result.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
+
   ## Examples
 
       iex> callback = fn (result) -> {:ok, result} end
@@ -261,6 +286,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to XML and calls function for each item.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+
   ## Examples
 
       iex> callback = fn (result) -> "XML is #{result |> String.strip}" end
@@ -279,6 +307,10 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to XML using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -300,6 +332,8 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to Manpage and returns result.
 
+  - `data` is either a string or a list
+
   ## Examples
 
       iex> "test" |> Cmark.to_man
@@ -315,6 +349,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to Manpage using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_man/2`.
 
@@ -349,7 +386,15 @@ defmodule Cmark do
   Compiles one or more (list) Markdown documents to Manpage using provided options
   and calls function with result.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
+
   ## Examples
+
+      iex> callback = fn (result) -> {:ok, result} end
+      iex> Cmark.to_man(~s(Something "smart" and ... ---you get it!), callback, [:smart])
+      {:ok, ".PP\nSomething \\[lq]smart\\[rq] and … \\[em]you get it!\n"}
 
       iex> callback = fn (results) ->
       iex>   Enum.map(results, &String.strip/1) |> Enum.join("%%joiner%%")
@@ -364,11 +409,10 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to Manpage and calls function for each item.
 
-  ## Examples
+  - `data` is either a string or a list
+  - `callback` is a callback function
 
-      iex> callback = fn (result) -> {:ok, result} end
-      iex> Cmark.to_man(~s(Something "smart" and ... ---you get it!), callback, [:smart])
-      {:ok, ".PP\nSomething \\[lq]smart\\[rq] and … \\[em]you get it!\n"}
+  ## Examples
 
       iex> callback = fn (result) -> "Manpage is #{result |> String.strip}" end
       iex> Cmark.to_man_each(["list", "test"], callback)
@@ -381,6 +425,10 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to Manpage using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -397,6 +445,8 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to CommonMark and returns result.
 
+  - `data` is either a string or a list
+
   ## Examples
 
       iex> "test" |> Cmark.to_commonmark
@@ -412,6 +462,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to CommonMark using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_commonmark/2`.
 
@@ -446,6 +499,10 @@ defmodule Cmark do
   Compiles one or more (list) Markdown documents to CommonMark using provided options
   and calls function with result.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
+
   ## Examples
 
       iex> callback = fn (result) -> {:ok, result} end
@@ -465,6 +522,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to CommonMark and calls function for each item.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+
   ## Examples
 
       iex> callback = fn (result) -> "CommonMark is #{result |> String.strip}" end
@@ -478,6 +538,10 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to CommonMark using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
@@ -494,6 +558,8 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to LaTeX and returns result.
 
+  - `data` is either a string or a list
+
   ## Examples
 
       iex> "test" |> Cmark.to_latex
@@ -509,6 +575,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles one or more (list) Markdown documents to LaTeX using provided options
   and returns result.
+
+  - `data` is either a string or a list
+  - `options_or_callback` is either an option list or a callback function
 
   Options are passed as a list of atoms. For details see `Cmark.to_latex/2`.
 
@@ -543,6 +612,10 @@ defmodule Cmark do
   Compiles one or more (list) Markdown documents to LaTeX using provided options
   and calls function with result.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
+
   ## Examples
 
       iex> callback = fn (result) -> {:ok, result} end
@@ -562,6 +635,9 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to LaTeX and calls function for each item.
 
+  - `data` is either a string or a list
+  - `callback` is a callback function
+
   ## Examples
 
       iex> callback = fn (result) -> "LaTeX is #{result |> String.strip}" end
@@ -575,6 +651,10 @@ defmodule Cmark do
   @doc ~S"""
   Compiles a list of Markdown documents to LaTeX using provided options and calls
   function for each item.
+
+  - `data` is either a string or a list
+  - `callback` is a callback function
+  - `options` is an option list
 
   ## Examples
 
