@@ -38,6 +38,8 @@ Cmark.to_html "a markdown string"
 #=> "<p>a markdown string</p>\n"
 ```
 
+More detailed documentation at <http://hexdocs.pm/cmark/>.
+
 ### Available functions
 
 #### HTML
@@ -82,7 +84,7 @@ Cmark.to_html "a markdown string"
 
 ## Documentation
 
-Latest API docs can be found at: <http://hexdocs.pm/cmark/0.6.2/Cmark.html>
+Latest API docs can be found at: <http://hexdocs.pm/cmark/Cmark.html>
 
 ## Licenses
 
