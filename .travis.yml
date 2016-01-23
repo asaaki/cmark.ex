@@ -27,3 +27,4 @@ after_script:
   - mix inch.report
   - mix dogma
   - mix credo --strict
+  - mix hex.outdated
