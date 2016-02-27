@@ -46,4 +46,24 @@ defmodule CmarkTest do
       assert actual_html == expected_html, error_message
     end
   end
+
+  @invalid_when_safe [
+    "<script>alert(document.cookie);</script>",
+    "</span>",
+    "<a href=\"https://example.com\">"
+  ]
+
+  for markdown <- @invalid_when_safe do
+    test "Removes HTML when :safe is set: #{markdown}" do
+      real_markdown = unquote(markdown)
+      actual_html  = Cmark.to_html(real_markdown, [:safe])
+      expected_html = "<!-- raw HTML omitted -->\n"
+      error_message = """
+      MARKDOWN: #{inspect real_markdown}
+      ACTUAL:   #{inspect actual_html}
+      EXPECTED: #{inspect expected_html}
+      """
+      assert actual_html == expected_html, error_message
+    end
+  end
 end
