@@ -81,7 +81,7 @@ defmodule Cmark.Parser do
   @flags %{
     sourcepos: 2,        # (1 <<< 1)
     hardbreaks: 4,       # (1 <<< 2)
-    safe: 16,            # (1 <<< 3)
+    safe: 8,             # (1 <<< 3)
     normalize: 256,      # (1 <<< 8)
     validate_utf8: 512,  # (1 <<< 9)
     smart: 1024,         # (1 <<< 10)
