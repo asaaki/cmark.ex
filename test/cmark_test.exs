@@ -50,7 +50,7 @@ defmodule CmarkTest do
   @invalid_when_safe [
     "<script>alert(document.cookie);</script>",
     "</span>",
-    "<a href=\"https://example.com\">"
+    ~S(<a href="https://example.com">)
   ]
 
   for markdown <- @invalid_when_safe do

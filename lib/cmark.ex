@@ -79,7 +79,7 @@ defmodule Cmark do
   @typedoc "Either an options list or a callback function"
   @type options_or_callback :: options_list | callback_fun
 
-  ##### HTML #####
+  # HTML #
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to HTML and returns result.
@@ -202,7 +202,7 @@ defmodule Cmark do
   def to_html_each(data, callback, options),
     do: Parser.parse_each(:html, data, callback, options)
 
-  ##### XML #####
+  # XML #
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to XML and returns result.
@@ -365,7 +365,7 @@ defmodule Cmark do
   def to_xml_each(data, callback, options),
     do: Parser.parse_each(:xml, data, callback, options)
 
-  ##### Manpage #####
+  # Manpage #
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to Manpage and returns result.
@@ -487,7 +487,7 @@ defmodule Cmark do
   def to_man_each(data, callback, options),
     do: Parser.parse_each(:man, data, callback, options)
 
-  ##### CommonMark #####
+  # CommonMark #
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to CommonMark and returns result.
@@ -609,7 +609,7 @@ defmodule Cmark do
   def to_commonmark_each(data, callback, options),
     do: Parser.parse_each(:commonmark, data, callback, options)
 
-  ##### LaTeX #####
+  # LaTeX #
 
   @doc ~S"""
   Compiles one or more (list) Markdown documents to LaTeX and returns result.
