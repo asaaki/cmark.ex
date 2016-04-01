@@ -17,16 +17,17 @@
 #define LIT(s) renderer->out(renderer, s, false, LITERAL)
 #define CR() renderer->cr(renderer)
 #define BLANKLINE() renderer->blankline(renderer)
+#define ENCODED_SIZE 20
+#define LISTMARKER_SIZE 20
 
 // Functions to convert cmark_nodes to commonmark strings.
 
-static inline void outc(cmark_renderer *renderer, cmark_escaping escape,
+static CMARK_INLINE void outc(cmark_renderer *renderer, cmark_escaping escape,
                         int32_t c, unsigned char nextc) {
   bool needs_escaping = false;
   bool follows_digit =
       renderer->buffer->size > 0 &&
       cmark_isdigit(renderer->buffer->ptr[renderer->buffer->size - 1]);
-  const size_t ENCODED_SIZE = 20;
   char encoded[ENCODED_SIZE];
 
   needs_escaping =
@@ -168,7 +169,6 @@ static int S_render_node(cmark_renderer *renderer, cmark_node *node,
   bool entering = (ev_type == CMARK_EVENT_ENTER);
   const char *info, *code, *title;
   size_t info_len, code_len;
-  const size_t LISTMARKER_SIZE = 20;
   char listmarker[LISTMARKER_SIZE];
   char *emph_delim;
   bufsize_t marker_width;
@@ -273,8 +273,8 @@ static int S_render_node(cmark_renderer *renderer, cmark_node *node,
     // begin or end with a blank line, and code isn't
     // first thing in a list item
     if (info_len == 0 &&
-        (code_len > 2 && !isspace(code[0]) &&
-         !(isspace(code[code_len - 1]) && isspace(code[code_len - 2]))) &&
+        (code_len > 2 && !isspace((unsigned char)code[0]) &&
+         !(isspace((unsigned char)code[code_len - 1]) && isspace((unsigned char)code[code_len - 2]))) &&
         !(node->prev == NULL && node->parent &&
           node->parent->type == CMARK_NODE_ITEM)) {
       LIT("    ");
