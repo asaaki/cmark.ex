@@ -86,7 +86,6 @@ test: spec
 ### LINT
 
 lint:
-	MIX_ENV=lint mix dogma
 	MIX_ENV=lint mix credo --strict
 
 ### PUBLISH
