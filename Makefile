@@ -117,8 +117,11 @@ clean: clean-objects clean-dirs
 clean-objects:
 	rm -f $(C_SRC_O_FILES)
 
-clean-dirs:
-	rm -rf $(BUILD_DIR) $(DEPS_DIR) $(PRIV_DIR) $(TMP_DIR)
+clean-dirs: clean-tmp
+	rm -rf $(BUILD_DIR) $(DEPS_DIR) $(PRIV_DIR)
+
+clean-tmp:
+	rm -rf $(TMP_DIR)
 
 ### DEVELOPMENT
 
