@@ -11,12 +11,12 @@ defmodule Cmark.Nif do
   @doc false
   @spec init :: :ok
   def init do
-    :ok = :erlang.load_nif(nif_path, 0)
+    :ok = :erlang.load_nif(nif_path(), 0)
   end
 
   @doc false
   defp nif_path,
-    do: :filename.join(priv_dir, 'cmark')
+    do: :filename.join(priv_dir(), 'cmark')
 
   @doc false
   defp priv_dir do
