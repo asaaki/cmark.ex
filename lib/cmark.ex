@@ -60,16 +60,24 @@ defmodule Cmark do
   @options_doc """
   Available options are:
 
-  - `:sourcepos` - Include a `data-sourcepos` attribute on all block elements.
-  - `:softbreak` - Render `softbreak` elements as hard line breaks.
-  - `:normalize` - Normalize tree by consolidating adjacent text nodes.
-  - `:smart` - Convert straight quotes to curly, --- to em dashes, -- to en dashes.
-  - `:validate_utf8` - Validate UTF-8 in the input before parsing, replacing
-     illegal sequences with the replacement character U+FFFD.
-  - `:safe` - Suppress raw HTML and unsafe links (`javascript:`, `vbscript:`,
-    `file:`, and `data:`, except for `image/png`, `image/gif`, `image/jpeg`, or
-    `image/webp` mime types).  Raw HTML is replaced by a placeholder HTML
-    comment. Unsafe links are replaced by empty strings.
+  - `:sourcepos`
+    Include a `data-sourcepos` attribute on all block elements.
+  - `:hardbreaks`
+    Render `softbreak` elements as hard line breaks.
+  - `:nobreaks`
+    Render `softbreak` elements as spaces.
+  - `:normalize`
+    Normalize tree by consolidating adjacent text nodes.
+  - `:smart`
+    Convert straight quotes to curly, --- to em dashes, -- to en dashes.
+  - `:validate_utf8`
+    Validate UTF-8 in the input before parsing, replacing
+    illegal sequences with the replacement character U+FFFD.
+  - `:safe`
+    Suppress raw HTML and unsafe links (`javascript:`, `vbscript:`, `file:`, and
+    `data:`, except for `image/png`, `image/gif`, `image/jpeg`, or `image/webp`
+    mime types). Raw HTML is replaced by a placeholder HTML comment.
+    Unsafe links are replaced by empty strings.
   """
 
   @typedoc "A list of atoms describing the options to use
