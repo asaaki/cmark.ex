@@ -222,24 +222,6 @@ static bool ends_with_blank_line(cmark_node *node) {
   return false;
 }
 
-// Break out of all containing lists
-static int break_out_of_lists(cmark_parser *parser, cmark_node **bptr) {
-  cmark_node *container = *bptr;
-  cmark_node *b = parser->root;
-  // find first containing NODE_LIST:
-  while (b && S_type(b) != CMARK_NODE_LIST) {
-    b = b->last_child;
-  }
-  if (b) {
-    while (container && container != b) {
-      container = finalize(parser, container);
-    }
-    finalize(parser, b);
-    *bptr = b->parent;
-  }
-  return 0;
-}
-
 static cmark_node *finalize(cmark_parser *parser, cmark_node *b) {
   bufsize_t pos;
   cmark_node *item;
@@ -401,10 +383,12 @@ static void process_inlines(cmark_mem *mem, cmark_node *root,
 // On success, returns length of the marker, and populates
 // data with the details.  On failure, returns 0.
 static bufsize_t parse_list_marker(cmark_mem *mem, cmark_chunk *input,
-                                   bufsize_t pos, cmark_list **dataptr) {
+                                   bufsize_t pos, bool interrupts_paragraph,
+                                   cmark_list **dataptr) {
   unsigned char c;
   bufsize_t startpos;
   cmark_list *data;
+  bufsize_t i;
 
   startpos = pos;
   c = peek_at(input, pos);
@@ -414,6 +398,18 @@ static bufsize_t parse_list_marker(cmark_mem *mem, cmark_chunk *input,
     if (!cmark_isspace(peek_at(input, pos))) {
       return 0;
     }
+
+    if (interrupts_paragraph) {
+      i = pos;
+      // require non-blank content after list marker:
+      while (S_is_space_or_tab(peek_at(input, i))) {
+        i++;
+      }
+      if (peek_at(input, i) == '\n') {
+        return 0;
+      }
+    }
+
     data = (cmark_list *)mem->calloc(1, sizeof(*data));
     data->marker_offset = 0; // will be adjusted later
     data->list_type = CMARK_BULLET_LIST;
@@ -434,12 +430,26 @@ static bufsize_t parse_list_marker(cmark_mem *mem, cmark_chunk *input,
       // This also seems to be the limit for 'start' in some browsers.
     } while (digits < 9 && cmark_isdigit(peek_at(input, pos)));
 
+    if (interrupts_paragraph && start != 1) {
+      return 0;
+    }
     c = peek_at(input, pos);
     if (c == '.' || c == ')') {
       pos++;
       if (!cmark_isspace(peek_at(input, pos))) {
         return 0;
       }
+      if (interrupts_paragraph) {
+        // require non-blank content after list marker:
+        i = pos;
+        while (S_is_space_or_tab(peek_at(input, i))) {
+          i++;
+        }
+        if (S_is_line_end_char(peek_at(input, i))) {
+          return 0;
+        }
+      }
+
       data = (cmark_list *)mem->calloc(1, sizeof(*data));
       data->marker_offset = 0; // will be adjusted later
       data->list_type = CMARK_ORDERED_LIST;
@@ -553,21 +563,27 @@ static void S_parser_feed(cmark_parser *parser, const unsigned char *buffer,
         cmark_strbuf_put(&parser->linebuf, buffer, chunk_len);
         // add replacement character
         cmark_strbuf_put(&parser->linebuf, repl, 3);
-        chunk_len += 1; // so we advance the buffer past NULL
       } else {
         cmark_strbuf_put(&parser->linebuf, buffer, chunk_len);
       }
     }
 
     buffer += chunk_len;
-    // skip over line ending characters:
-    if (buffer < end && *buffer == '\r') {
-      buffer++;
-      if (buffer == end)
-        parser->last_buffer_ended_with_cr = true;
+    if (buffer < end) {
+      if (*buffer == '\0') {
+        // skip over NULL
+        buffer++;
+      } else {
+        // skip over line ending characters
+        if (*buffer == '\r') {
+          buffer++;
+          if (buffer == end)
+            parser->last_buffer_ended_with_cr = true;
+        }
+        if (*buffer == '\n')
+          buffer++;
+      }
     }
-    if (buffer < end && *buffer == '\n')
-      buffer++;
   }
 }
 
@@ -852,6 +868,8 @@ static void open_new_blocks(cmark_parser *parser, cmark_node **container,
 
     if (!indented && peek_at(input, parser->first_nonspace) == '>') {
 
+      bufsize_t blockquote_startpos = parser->first_nonspace;
+
       S_advance_offset(parser, input,
                        parser->first_nonspace + 1 - parser->offset, false);
       // optional following character
@@ -859,18 +877,19 @@ static void open_new_blocks(cmark_parser *parser, cmark_node **container,
         S_advance_offset(parser, input, 1, true);
       }
       *container = add_child(parser, *container, CMARK_NODE_BLOCK_QUOTE,
-                             parser->offset + 1);
+                             blockquote_startpos + 1);
 
     } else if (!indented && (matched = scan_atx_heading_start(
                                  input, parser->first_nonspace))) {
       bufsize_t hashpos;
       int level = 0;
+      bufsize_t heading_startpos = parser->first_nonspace;
 
       S_advance_offset(parser, input,
                        parser->first_nonspace + matched - parser->offset,
                        false);
-      *container =
-          add_child(parser, *container, CMARK_NODE_HEADING, parser->offset + 1);
+      *container = add_child(parser, *container, CMARK_NODE_HEADING,
+                             heading_startpos + 1);
 
       hashpos = cmark_chunk_strchr(input, '#', parser->first_nonspace);
 
@@ -920,9 +939,11 @@ static void open_new_blocks(cmark_parser *parser, cmark_node **container,
       *container = add_child(parser, *container, CMARK_NODE_THEMATIC_BREAK,
                              parser->first_nonspace + 1);
       S_advance_offset(parser, input, input->len - 1 - parser->offset, false);
-    } else if ((matched = parse_list_marker(parser->mem, input,
-                                            parser->first_nonspace, &data)) &&
-               (!indented || cont_type == CMARK_NODE_LIST)) {
+    } else if ((!indented || cont_type == CMARK_NODE_LIST) &&
+               (matched = parse_list_marker(
+                    parser->mem, input, parser->first_nonspace,
+                    (*container)->type == CMARK_NODE_PARAGRAPH, &data))) {
+
       // Note that we can have new list items starting with >= 4
       // spaces indent, as long as the list container is still open.
       int i = 0;
@@ -974,7 +995,7 @@ static void open_new_blocks(cmark_parser *parser, cmark_node **container,
                              parser->first_nonspace + 1);
       /* TODO: static */
       memcpy(&((*container)->as.list), data, sizeof(*data));
-      free(data);
+      parser->mem->free(data);
     } else if (indented && !maybe_lazy && !parser->blank) {
       S_advance_offset(parser, input, CODE_INDENT, true);
       *container = add_child(parser, *container, CMARK_NODE_CODE_BLOCK,
@@ -1145,10 +1166,6 @@ static void S_process_line(cmark_parser *parser, const unsigned char *buffer,
     goto finished;
 
   container = last_matched_container;
-
-  // check to see if we've hit 2nd blank line, break out of list:
-  if (parser->blank && S_last_line_blank(container))
-    break_out_of_lists(parser, &container);
 
   open_new_blocks(parser, &container, &input, all_matched);
 

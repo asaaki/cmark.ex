@@ -330,9 +330,8 @@ static void print_delimiters(subject *subj)
         delimiter *delim;
         delim = subj->last_delim;
         while (delim != NULL) {
-                printf("Item at stack pos %p, text pos %d: %d %d %d next(%p)
-prev(%p)\n",
-                       (void*)delim, delim->position, delim->delim_char,
+                printf("Item at stack pos %p: %d %d %d next(%p) prev(%p)\n",
+                       (void*)delim, delim->delim_char,
                        delim->can_open, delim->can_close,
                        (void*)delim->next, (void*)delim->previous);
                 delim = delim->previous;
@@ -353,7 +352,7 @@ static void remove_delimiter(subject *subj, delimiter *delim) {
   if (delim->previous != NULL) {
     delim->previous->next = delim->next;
   }
-  free(delim);
+  subj->mem->free(delim);
 }
 
 static void pop_bracket(subject *subj) {
@@ -362,7 +361,7 @@ static void pop_bracket(subject *subj) {
     return;
   b = subj->last_bracket;
   subj->last_bracket = subj->last_bracket->previous;
-  free(b);
+  subj->mem->free(b);
 }
 
 static void push_delimiter(subject *subj, unsigned char c, bool can_open,
@@ -799,7 +798,7 @@ noMatch:
 
 // Return a link, an image, or a literal close bracket.
 static cmark_node *handle_close_bracket(subject *subj) {
-  bufsize_t initial_pos;
+  bufsize_t initial_pos, after_link_text_pos;
   bufsize_t starturl, endurl, starttitle, endtitle, endall;
   bufsize_t n;
   bufsize_t sps;
@@ -833,6 +832,8 @@ static cmark_node *handle_close_bracket(subject *subj) {
   // Now we check to see if it's a link/image.
   is_image = opener->image;
 
+  after_link_text_pos = subj->pos;
+
   // First, look for an inline link.
   if (peek_char(subj) == '(' &&
       ((sps = scan_spacechars(&subj->input, subj->pos + 1)) > -1) &&
@@ -863,7 +864,8 @@ static cmark_node *handle_close_bracket(subject *subj) {
       goto match;
 
     } else {
-      goto noMatch;
+      // it could still be a shortcut reference link
+      subj->pos = after_link_text_pos;
     }
   }
 
