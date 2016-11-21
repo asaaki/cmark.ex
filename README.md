@@ -6,6 +6,7 @@
 [![Build Status (master)](https://img.shields.io/travis/asaaki/cmark.ex/master.svg?style=flat-square)](https://travis-ci.org/asaaki/cmark.ex)
 [![Coverage Status (master)](https://img.shields.io/coveralls/asaaki/cmark.ex/master.svg?style=flat-square)](https://coveralls.io/r/asaaki/cmark.ex)
 [![Inline docs](http://inch-ci.org/github/asaaki/cmark.ex.svg?branch=master&style=flat-square)](http://inch-ci.org/github/asaaki/cmark.ex)
+[![Deps Status](https://beta.hexfaktor.org/badge/all/github/asaaki/cmark.ex.svg)](https://beta.hexfaktor.org/github/asaaki/cmark.ex)
 
 Elixir NIF for [cmark (C)](https://github.com/jgm/cmark), a parser library following the [CommonMark](http://commonmark.org/) spec.
 

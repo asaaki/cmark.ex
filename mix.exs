@@ -64,12 +64,12 @@ defmodule Cmark.Mixfile do
 
   defp deps do
     [
-      {:credo, "~> 0.4", only: [:lint, :ci]},
-      {:ex_doc, "~> 0.12", only: [:docs, :ci]},
+      {:credo, "~> 0.5", only: [:lint, :ci]},
+      {:ex_doc, "~> 0.14", only: [:docs, :ci]},
       {:excoveralls, "~> 0.5", only: :ci},
       {:inch_ex, "~> 0.5", only: [:docs, :ci]},
-      {:poison, "~> 2.2", only: [:dev, :test, :docs, :lint, :ci], override: true},
-      {:dialyxir, "~> 0.3", only: [:dev]},
+      {:poison, "~> 3.0", only: [:dev, :test, :docs, :lint, :ci], override: true},
+      {:dialyxir, "~> 0.4", only: [:dev]},
     ]
   end
 end
