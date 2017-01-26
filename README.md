@@ -27,7 +27,7 @@ You need a C compiler like `gcc` or `clang`.
 Add this to your dependencies:
 
 ```elixir
-{:cmark, "~> 0.6"}
+{:cmark, "~> 0.7"}
 ```
 
 ## Usage
