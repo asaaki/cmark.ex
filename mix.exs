@@ -1,13 +1,13 @@
 defmodule Cmark.Mixfile do
   use Mix.Project
 
-  @version "0.6.10"
+  @version "0.7.0-dev"
 
   def project do
     [
       app:           :cmark,
       version:       @version,
-      elixir:        "~> 1.0",
+      elixir:        "~> 1.3",
       compilers:     [:cmark, :elixir, :app],
       deps:          deps(),
       package:       package(),
