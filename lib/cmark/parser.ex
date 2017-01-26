@@ -66,7 +66,6 @@ defmodule Cmark.Parser do
     |> Enum.map(&Task.await(&1))
   end
 
-
   @doc false
   @spec parse_doc(String.t, Cmark.callback_fun, Cmark.options_list, format_atom) :: any
   defp parse_doc(document, callback, options, format),
