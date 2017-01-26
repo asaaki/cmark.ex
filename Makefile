@@ -90,13 +90,10 @@ lint:
 
 ### PUBLISH
 
-publish: docs publish-code publish-docs
+publish: publish-code
 
 publish-code: all
 	@mix hex.publish
-
-publish-docs: docs
-	@MIX_ENV=docs mix hex.docs
 
 ### HELPERS/TOOLS
 
