@@ -12,7 +12,7 @@ Elixir NIF for [cmark (C)](https://github.com/jgm/cmark), a parser library follo
 
 ## CommonMark
 
-> A strongly specified, highly compatible implementation of Markdown
+> A strongly defined, highly compatible specification of Markdown
 
 For more information visit <http://commonmark.org/>.
 
