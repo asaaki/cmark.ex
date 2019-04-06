@@ -81,12 +81,19 @@ defmodule Mix.Tasks.Compile.Cmark do
     if Mix.env != :test, do: File.rm_rf("priv")
     File.mkdir("priv")
 
-    {result, error_code} = System.cmd("make", [], stderr_to_stdout: true)
+    make_cmd = System.get_env("MAKE") || case :os.type() do
+      {:unix, :freebsd} -> "gmake"
+      {:unix, :openbsd} -> "gmake"
+      {:unix, :netbsd} -> "gmake"
+      {:unix, :dragonfly} -> "gmake"
+      _ -> "make"
+    end
+    {result, error_code} = System.cmd(make_cmd, [], stderr_to_stdout: true)
     IO.binwrite(result)
 
     if error_code != 0 do
       raise Mix.Error, message: """
-        Could not run `make`.
+        Could not run `#{make_cmd}`.
         Please check if `make` and either `clang` or `gcc` are installed
       """
     end
