@@ -42,5 +42,5 @@ Latest API docs can be found at: <http://hexdocs.pm/cmark/Cmark.html>
 
 ## Licenses
 
--   Cmark.ex: [LICENSE](./LICENSE) (MIT)
--   cmark (C): [c_src/COPYING](./c_src/COPYING) (multiple)
+-   Cmark.ex: [LICENSE](https://github.com/asaaki/cmark.ex/blob/master/LICENSE) (MIT)
+-   cmark (C): [c_src/COPYING](https://github.com/asaaki/cmark.ex/blob/master/c_src/COPYING) (multiple)
