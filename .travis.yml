@@ -7,19 +7,16 @@ cache:
     - ~/.hex
     - ~/.mix
 
-matrix:
-  include:
-    - otp_release: 22.3
-      elixir: 1.10
-    - otp_release: 21.3
-      elixir: 1.9
-    - otp_release: 21.3
-      elixir: 1.8
-
+elixir:
+  - 1.10
+  - 1.9
+  - 1.8
+otp_release:
+  - 22.3
+  - 21.3
 env:
-  matrix:
-    - CC=clang
-    - CC=gcc
+  - CC=clang
+  - CC=gcc
 
 before_install:
   - kerl list installations
