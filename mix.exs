@@ -7,7 +7,7 @@ defmodule Cmark.Mixfile do
     [
       app:           :cmark,
       version:       @version,
-      elixir:        "~> 1.3",
+      elixir:        "~> 1.10",
       compilers:     [:cmark, :elixir, :app],
       deps:          deps(),
       package:       package(),
