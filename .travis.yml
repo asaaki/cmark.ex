@@ -2,26 +2,38 @@ sudo: false
 
 language: elixir
 
+cache:
+  directories:
+    - ~/.hex
+    - ~/.mix
+
 elixir:
-  - 1.3.4
-  - 1.4.0
-
+  - 1.10
+  - 1.9
+  - 1.8
 otp_release:
-  - 19.1
-
+  - 22.3
+  - 21.3
 env:
-  matrix:
-    - CC=clang
-    - CC=gcc
+  - CC=clang
+  - CC=gcc
 
 before_install:
   - kerl list installations
   - export MIX_ENV=ci
 
-after_success:
-  - mix coveralls.travis
+install:
+  - mix local.hex --force
+  - mix local.rebar --force
+  - mix deps.get
+
+script:
+  - mix test
 
 after_script:
   - mix inch.report
   - mix credo --strict
   - mix hex.outdated
+
+after_success:
+  - mix coveralls.travis

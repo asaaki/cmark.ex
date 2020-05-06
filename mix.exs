@@ -7,7 +7,7 @@ defmodule Cmark.Mixfile do
     [
       app:           :cmark,
       version:       @version,
-      elixir:        "~> 1.3",
+      elixir:        "~> 1.8",
       compilers:     [:cmark, :elixir, :app],
       deps:          deps(),
       package:       package(),
@@ -64,12 +64,12 @@ defmodule Cmark.Mixfile do
 
   defp deps do
     [
-      {:credo, "~> 0.5", only: [:lint, :ci]},
-      {:ex_doc, "~> 0.14", only: [:dev, :docs, :ci]},
-      {:excoveralls, "~> 0.5", only: :ci},
-      {:inch_ex, "~> 0.5", only: [:docs, :ci]},
-      {:poison, "~> 3.0", only: [:dev, :test, :docs, :lint, :ci], override: true},
-      {:dialyxir, "~> 0.4", only: [:dev]},
+      {:credo, "~> 1.4", only: [:lint, :ci]},
+      {:ex_doc, "~> 0.21", only: [:dev, :docs, :ci]},
+      {:excoveralls, "~> 0.6", only: :ci},
+      {:inch_ex, "~> 2.0", only: [:docs, :ci]},
+      {:jason, "~> 1.2", only: [:dev, :test, :docs, :lint, :ci], override: true},
+      {:dialyxir, "~> 1.0", only: [:dev]},
     ]
   end
 end

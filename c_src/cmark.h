@@ -100,6 +100,10 @@ typedef struct cmark_mem {
   void (*free)(void *);
 } cmark_mem;
 
+/** Returns a pointer to the default memory allocator.
+ */
+CMARK_EXPORT cmark_mem *cmark_get_default_mem_allocator();
+
 /**
  * ## Creating and Destroying Nodes
  */
@@ -265,7 +269,8 @@ CMARK_EXPORT
 const char *cmark_node_get_type_string(cmark_node *node);
 
 /** Returns the string contents of 'node', or an empty
-    string if none is set.
+    string if none is set.  Returns NULL if called on a
+    node that does not have string content.
  */
 CMARK_EXPORT const char *cmark_node_get_literal(cmark_node *node);
 
@@ -334,7 +339,8 @@ CMARK_EXPORT const char *cmark_node_get_fence_info(cmark_node *node);
 CMARK_EXPORT int cmark_node_set_fence_info(cmark_node *node, const char *info);
 
 /** Returns the URL of a link or image 'node', or an empty string
-    if no URL is set.
+    if no URL is set.  Returns NULL if called on a node that is
+    not a link or image.
  */
 CMARK_EXPORT const char *cmark_node_get_url(cmark_node *node);
 
@@ -344,7 +350,8 @@ CMARK_EXPORT const char *cmark_node_get_url(cmark_node *node);
 CMARK_EXPORT int cmark_node_set_url(cmark_node *node, const char *url);
 
 /** Returns the title of a link or image 'node', or an empty
-    string if no title is set.
+    string if no title is set.  Returns NULL if called on a node
+    that is not a link or image.
  */
 CMARK_EXPORT const char *cmark_node_get_title(cmark_node *node);
 
@@ -354,7 +361,8 @@ CMARK_EXPORT const char *cmark_node_get_title(cmark_node *node);
 CMARK_EXPORT int cmark_node_set_title(cmark_node *node, const char *title);
 
 /** Returns the literal "on enter" text for a custom 'node', or
-    an empty string if no on_enter is set.
+    an empty string if no on_enter is set.  Returns NULL if called
+    on a non-custom node.
  */
 CMARK_EXPORT const char *cmark_node_get_on_enter(cmark_node *node);
 
@@ -366,7 +374,8 @@ CMARK_EXPORT int cmark_node_set_on_enter(cmark_node *node,
                                          const char *on_enter);
 
 /** Returns the literal "on exit" text for a custom 'node', or
-    an empty string if no on_exit is set.
+    an empty string if no on_exit is set.  Returns NULL if
+    called on a non-custom node.
  */
 CMARK_EXPORT const char *cmark_node_get_on_exit(cmark_node *node);
 
@@ -547,13 +556,19 @@ char *cmark_render_latex(cmark_node *root, int options, int width);
  */
 #define CMARK_OPT_HARDBREAKS (1 << 2)
 
-/** Suppress raw HTML and unsafe links (`javascript:`, `vbscript:`,
- * `file:`, and `data:`, except for `image/png`, `image/gif`,
- * `image/jpeg`, or `image/webp` mime types).  Raw HTML is replaced
- * by a placeholder HTML comment. Unsafe links are replaced by
- * empty strings.
+/** `CMARK_OPT_SAFE` is defined here for API compatibility,
+    but it no longer has any effect. "Safe" mode is now the default:
+    set `CMARK_OPT_UNSAFE` to disable it.
  */
 #define CMARK_OPT_SAFE (1 << 3)
+
+/** Render raw HTML and unsafe links (`javascript:`, `vbscript:`,
+ * `file:`, and `data:`, except for `image/png`, `image/gif`,
+ * `image/jpeg`, or `image/webp` mime types).  By default,
+ * raw HTML is replaced by a placeholder HTML comment. Unsafe
+ * links are replaced by empty strings.
+ */
+#define CMARK_OPT_UNSAFE (1 << 17)
 
 /** Render `softbreak` elements as spaces.
  */
@@ -563,7 +578,7 @@ char *cmark_render_latex(cmark_node *root, int options, int width);
  * ### Options affecting parsing
  */
 
-/** Normalize tree by consolidating adjacent text nodes.
+/** Legacy option (no effect).
  */
 #define CMARK_OPT_NORMALIZE (1 << 8)
 

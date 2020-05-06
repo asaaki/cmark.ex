@@ -1,7 +1,7 @@
 defmodule CmarkTest do
   use ExUnit.Case, async: true
 
-  @cmark_specs "test/cmark_specs.json" |> File.read! |> Poison.decode!(keys: :atoms)
+  @cmark_specs "test/cmark_specs.json" |> File.read! |> Jason.decode!(keys: :atoms)
 
   for %{
         section: section,
@@ -13,7 +13,7 @@ defmodule CmarkTest do
       } <- @cmark_specs do
     test "Section: »#{section}«, Example: #{example}, Lines: #{start_line}-#{end_line}" do
       real_markdown = unquote(markdown)
-      actual_html   = Cmark.to_html(real_markdown)
+      actual_html   = Cmark.to_html(real_markdown, [:unsafe])
       expected_html = unquote(html)
       error_message = """
       MARKDOWN: #{inspect real_markdown}
@@ -24,7 +24,7 @@ defmodule CmarkTest do
     end
   end
 
-  @cmark_smart_punct "test/cmark_smart_punct.json" |> File.read! |> Poison.decode!(keys: :atoms)
+  @cmark_smart_punct "test/cmark_smart_punct.json" |> File.read! |> Jason.decode!(keys: :atoms)
 
   for %{
         section: section,
@@ -54,9 +54,9 @@ defmodule CmarkTest do
   ]
 
   for markdown <- @invalid_when_safe do
-    test "Removes HTML when :safe is set: #{markdown}" do
+    test "Removes HTML by default: #{markdown}" do
       real_markdown = unquote(markdown)
-      actual_html  = Cmark.to_html(real_markdown, [:safe])
+      actual_html  = Cmark.to_html(real_markdown)
       expected_html = "<!-- raw HTML omitted -->\n"
       error_message = """
       MARKDOWN: #{inspect real_markdown}
