@@ -49,15 +49,6 @@ static ERL_NIF_TERM render(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) 
     return enif_make_badarg(env);
   }
 
-  if (markdown_binary.size <= 0){
-    enif_release_binary(&markdown_binary);
-    const char *empty_string = "";
-    const int   empty_len    = strlen(empty_string);
-    enif_alloc_binary(empty_len, &output_binary);
-    strncpy((char*)output_binary.data, empty_string, empty_len);
-    return enif_make_binary(env, &output_binary);
-  }
-
   doc = cmark_parse_document(
     (const char *)markdown_binary.data,
     markdown_binary.size,
@@ -89,7 +80,7 @@ static ERL_NIF_TERM render(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) 
   enif_release_binary(&markdown_binary);
 
   enif_alloc_binary(output_len, &output_binary);
-  strncpy((char*)output_binary.data, output, output_len);
+  memcpy(output_binary.data, output, output_len);
 
   free(output);
   cmark_node_free(doc);
@@ -106,7 +97,7 @@ int upgrade(ErlNifEnv* _env, void** _priv_data, void** _old_priv_data, ERL_NIF_T
 };
 
 static ErlNifFunc nif_funcs[] = {
-  { "render", 3, render }
+  { "render", 3, render, ERL_NIF_DIRTY_JOB_CPU_BOUND }
 };
 
 ERL_NIF_INIT(Elixir.Cmark.Nif, nif_funcs, NULL, reload, upgrade, NULL)
