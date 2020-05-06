@@ -1,12 +1,6 @@
 defmodule Cmark.Nif do
+  @moduledoc false
   @on_load {:init, 0}
-
-  @moduledoc """
-  NIF module
-
-  Wraps the libcmark library.
-  Do not use this module directly but via `Cmark`'s functions.
-  """
 
   @doc false
   @spec init :: :ok
