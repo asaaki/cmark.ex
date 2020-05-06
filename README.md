@@ -26,13 +26,13 @@ You need a C compiler like `gcc` or `clang`.
 Add this to your dependencies:
 
 ```elixir
-{:cmark, "~> 0.7"}
+{:cmark, "~> 0.8"}
 ```
 
 ## Usage
 
 ```elixir
-Cmark.to_html "a markdown string"
+Cmark.to_html("a markdown string")
 #=> "<p>a markdown string</p>\n"
 ```
 
