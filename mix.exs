@@ -35,8 +35,7 @@ defmodule Cmark.Mixfile do
       licenses: ["MIT"],
       links: %{
         "GitHub" => "https://github.com/asaaki/cmark.ex",
-        "Issues" => "https://github.com/asaaki/cmark.ex/issues",
-        "Docs" => "http://hexdocs.pm/cmark/#{@version}/"
+        "Issues" => "https://github.com/asaaki/cmark.ex/issues"
       },
       files: [
         "c_src/*.h",
