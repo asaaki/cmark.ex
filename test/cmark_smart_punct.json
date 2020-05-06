@@ -72,51 +72,59 @@
     "start_line": 72
   },
   {
-    "end_line": 92,
+    "end_line": 88,
     "example": 10,
-    "html": "<p>&quot;This is not smart.&quot;\nThis isn't either.\n5'8&quot;</p>\n",
-    "markdown": "\\\"This is not smart.\\\"\nThis isn\\'t either.\n5\\'8\\\"\n",
+    "html": "<p>[a]’s b’</p>\n",
+    "markdown": "[a]'s b'\n",
     "section": "Smart punctuation",
     "start_line": 84
   },
   {
-    "end_line": 108,
+    "end_line": 101,
     "example": 11,
+    "html": "<p>&quot;This is not smart.&quot;\nThis isn't either.\n5'8&quot;</p>\n",
+    "markdown": "\\\"This is not smart.\\\"\nThis isn\\'t either.\n5\\'8\\\"\n",
+    "section": "Smart punctuation",
+    "start_line": 93
+  },
+  {
+    "end_line": 117,
+    "example": 12,
     "html": "<p>Some dashes:  em—em\nen–en\nem — em\nen – en\n2–3</p>\n",
     "markdown": "Some dashes:  em---em\nen--en\nem --- em\nen -- en\n2--3\n",
     "section": "Smart punctuation",
-    "start_line": 96
+    "start_line": 105
   },
   {
-    "end_line": 143,
-    "example": 12,
+    "end_line": 152,
+    "example": 13,
     "html": "<p>one-\ntwo–\nthree—\nfour––\nfive—–\nsix——\nseven—––\neight––––\nnine———\nthirteen———––.</p>\n",
     "markdown": "one-\ntwo--\nthree---\nfour----\nfive-----\nsix------\nseven-------\neight--------\nnine---------\nthirteen-------------.\n",
     "section": "Smart punctuation",
-    "start_line": 121
+    "start_line": 130
   },
   {
-    "end_line": 151,
-    "example": 13,
+    "end_line": 160,
+    "example": 14,
     "html": "<p>Escaped hyphens: -- ---.</p>\n",
     "markdown": "Escaped hyphens: \\-- \\-\\-\\-.\n",
     "section": "Smart punctuation",
-    "start_line": 147
-  },
-  {
-    "end_line": 159,
-    "example": 14,
-    "html": "<p>Ellipses…and…and….</p>\n",
-    "markdown": "Ellipses...and...and....\n",
-    "section": "Smart punctuation",
-    "start_line": 155
+    "start_line": 156
   },
   {
     "end_line": 168,
     "example": 15,
+    "html": "<p>Ellipses…and…and….</p>\n",
+    "markdown": "Ellipses...and...and....\n",
+    "section": "Smart punctuation",
+    "start_line": 164
+  },
+  {
+    "end_line": 177,
+    "example": 16,
     "html": "<p>No ellipses...</p>\n",
     "markdown": "No ellipses\\.\\.\\.\n",
     "section": "Smart punctuation",
-    "start_line": 164
+    "start_line": 173
   }
 ]
