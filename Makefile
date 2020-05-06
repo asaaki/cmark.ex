@@ -1,4 +1,6 @@
 CC?=clang
+# this is required for local development and calling make directly
+ERTS_INCLUDE_DIR?=$(shell erl -eval 'io:format("~s", [lists:concat([code:root_dir(), "/erts-", erlang:system_info(version), "/include"])])' -s init stop -noshell)
 ERLANG_FLAGS?=-I$(ERTS_INCLUDE_DIR)
 EBIN_DIR?=ebin
 
