@@ -1,50 +1,32 @@
 defmodule CmarkTest do
   use ExUnit.Case, async: true
 
-  @cmark_specs "test/cmark_specs.json" |> File.read! |> Jason.decode!(keys: :atoms)
-
-  for %{
-        section: section,
-        example: example,
-        markdown: markdown,
-        html: html,
-        start_line: start_line,
-        end_line: end_line
-      } <- @cmark_specs do
-    test "Section: »#{section}«, Example: #{example}, Lines: #{start_line}-#{end_line}" do
-      real_markdown = unquote(markdown)
-      actual_html   = Cmark.to_html(real_markdown, [:unsafe])
-      expected_html = unquote(html)
-      error_message = """
-      MARKDOWN: #{inspect real_markdown}
-      ACTUAL:   #{inspect actual_html}
-      EXPECTED: #{inspect expected_html}
-      """
-      assert actual_html == expected_html, error_message
-    end
+  test "empty strings" do
+    assert Cmark.to_html("") == ""
+    assert Cmark.to_man("") == ""
+    assert Cmark.to_commonmark("") == ""
+    assert Cmark.to_latex("") == ""
+    assert Cmark.to_xml("") == ""
   end
 
-  @cmark_smart_punct "test/cmark_smart_punct.json" |> File.read! |> Jason.decode!(keys: :atoms)
+  test "UTF-8" do
+    assert Cmark.to_html(<<0>>) == "<p>�</p>\n"
+    assert Cmark.to_man(<<0>>) == ".PP\n�\n"
+    assert Cmark.to_commonmark(<<0>>) == "�\n"
+    assert Cmark.to_latex(<<0>>) == "�\n"
+    assert Cmark.to_xml(<<0>>) =~ "<text xml:space=\"preserve\">�</text>"
 
-  for %{
-        section: section,
-        example: example,
-        markdown: markdown,
-        html: html,
-        start_line: start_line,
-        end_line: end_line
-      } <- @cmark_smart_punct do
-    test "Section: »#{section}«, Example: #{example}, Lines: #{start_line}-#{end_line}" do
-      real_markdown = unquote(markdown)
-      actual_html   = Cmark.to_html(real_markdown, [:smart])
-      expected_html = unquote(html)
-      error_message = """
-      MARKDOWN: #{inspect real_markdown}
-      ACTUAL:   #{inspect actual_html}
-      EXPECTED: #{inspect expected_html}
-      """
-      assert actual_html == expected_html, error_message
-    end
+    assert Cmark.to_html(<<255>>) == "<p>\xFF</p>\n"
+    assert Cmark.to_man(<<255>>) == ".PP\n"
+    assert Cmark.to_commonmark(<<255>>) == "\n"
+    assert Cmark.to_latex(<<255>>) == "\n"
+    assert Cmark.to_xml(<<255>>) =~ "<text xml:space=\"preserve\">\xFF</text>"
+
+    assert Cmark.to_html(<<255>>, [:validate_utf8]) == "<p>�</p>\n"
+    assert Cmark.to_man(<<255>>, [:validate_utf8]) == ".PP\n�\n"
+    assert Cmark.to_commonmark(<<255>>, [:validate_utf8]) == "�\n"
+    assert Cmark.to_latex(<<255>>, [:validate_utf8]) == "�\n"
+    assert Cmark.to_xml(<<255>>, [:validate_utf8]) =~ "<text xml:space=\"preserve\">�</text>"
   end
 
   @invalid_when_safe [
