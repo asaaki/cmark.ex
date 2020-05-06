@@ -8,7 +8,7 @@ defmodule Cmark.Mixfile do
       app: :cmark,
       version: @version,
       elixir: "~> 1.8",
-      compilers: [:cmark, :elixir, :app],
+      compilers: [:elixir_make, :elixir, :app],
       deps: deps(),
       package: package(),
       description: description(),
@@ -64,6 +64,7 @@ defmodule Cmark.Mixfile do
 
   defp deps do
     [
+      {:elixir_make, "~> 0.6"},
       {:credo, "~> 1.4", only: [:lint, :ci]},
       {:ex_doc, "~> 0.21", only: [:dev, :docs, :ci]},
       {:excoveralls, "~> 0.6", only: :ci},
@@ -71,46 +72,5 @@ defmodule Cmark.Mixfile do
       {:jason, "~> 1.2", only: [:dev, :test, :docs, :lint, :ci], override: true},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
-  end
-end
-
-defmodule Mix.Tasks.Compile.Cmark do
-  use Mix.Task
-  @shortdoc "Compiles cmark library"
-  def run(_) do
-    if Mix.env() != :test, do: File.rm_rf("priv")
-    File.mkdir("priv")
-
-    make_cmd =
-      System.get_env("MAKE") ||
-        case :os.type() do
-          {:unix, :freebsd} -> "gmake"
-          {:unix, :openbsd} -> "gmake"
-          {:unix, :netbsd} -> "gmake"
-          {:unix, :dragonfly} -> "gmake"
-          _ -> "make"
-        end
-
-    {result, error_code} = System.cmd(make_cmd, [], stderr_to_stdout: true)
-    IO.binwrite(result)
-
-    if error_code != 0 do
-      raise Mix.Error,
-        message: """
-          Could not run `#{make_cmd}`.
-          Please check if `make` and either `clang` or `gcc` are installed
-        """
-    end
-
-    Mix.Project.build_structure()
-    :ok
-  end
-end
-
-defmodule Mix.Tasks.Spec do
-  use Mix.Task
-  @shortdoc "Runs spec test"
-  def run(_) do
-    Mix.shell().cmd("make spec")
   end
 end

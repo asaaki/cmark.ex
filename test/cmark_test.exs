@@ -3,10 +3,10 @@ defmodule CmarkTest do
 
   test "empty strings" do
     assert Cmark.to_html("") == ""
-    assert Cmark.to_man("") == ""
-    assert Cmark.to_commonmark("") == ""
-    assert Cmark.to_latex("") == ""
-    assert Cmark.to_xml("") == ""
+    assert Cmark.to_man("") == "\n"
+    assert Cmark.to_commonmark("") == "\n"
+    assert Cmark.to_latex("") == "\n"
+    assert Cmark.to_xml("") == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\" />\n"
   end
 
   test "UTF-8" do
