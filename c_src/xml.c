@@ -60,8 +60,8 @@ static int S_render_node(cmark_node *node, cmark_event_type ev_type,
     case CMARK_NODE_CODE:
     case CMARK_NODE_HTML_BLOCK:
     case CMARK_NODE_HTML_INLINE:
-      cmark_strbuf_puts(xml, ">");
-      escape_xml(xml, node->as.literal.data, node->as.literal.len);
+      cmark_strbuf_puts(xml, " xml:space=\"preserve\">");
+      escape_xml(xml, node->data, node->len);
       cmark_strbuf_puts(xml, "</");
       cmark_strbuf_puts(xml, cmark_node_get_type_string(node));
       literal = true;
@@ -95,13 +95,13 @@ static int S_render_node(cmark_node *node, cmark_event_type ev_type,
       cmark_strbuf_puts(xml, buffer);
       break;
     case CMARK_NODE_CODE_BLOCK:
-      if (node->as.code.info.len > 0) {
+      if (node->as.code.info) {
         cmark_strbuf_puts(xml, " info=\"");
-        escape_xml(xml, node->as.code.info.data, node->as.code.info.len);
+        escape_xml(xml, node->as.code.info, strlen((char *)node->as.code.info));
         cmark_strbuf_putc(xml, '"');
       }
-      cmark_strbuf_puts(xml, ">");
-      escape_xml(xml, node->as.code.literal.data, node->as.code.literal.len);
+      cmark_strbuf_puts(xml, " xml:space=\"preserve\">");
+      escape_xml(xml, node->data, node->len);
       cmark_strbuf_puts(xml, "</");
       cmark_strbuf_puts(xml, cmark_node_get_type_string(node));
       literal = true;
@@ -109,22 +109,25 @@ static int S_render_node(cmark_node *node, cmark_event_type ev_type,
     case CMARK_NODE_CUSTOM_BLOCK:
     case CMARK_NODE_CUSTOM_INLINE:
       cmark_strbuf_puts(xml, " on_enter=\"");
-      escape_xml(xml, node->as.custom.on_enter.data,
-                 node->as.custom.on_enter.len);
+      escape_xml(xml, node->as.custom.on_enter,
+                 strlen((char *)node->as.custom.on_enter));
       cmark_strbuf_putc(xml, '"');
       cmark_strbuf_puts(xml, " on_exit=\"");
-      escape_xml(xml, node->as.custom.on_exit.data,
-                 node->as.custom.on_exit.len);
+      escape_xml(xml, node->as.custom.on_exit,
+                 strlen((char *)node->as.custom.on_exit));
       cmark_strbuf_putc(xml, '"');
       break;
     case CMARK_NODE_LINK:
     case CMARK_NODE_IMAGE:
       cmark_strbuf_puts(xml, " destination=\"");
-      escape_xml(xml, node->as.link.url.data, node->as.link.url.len);
+      escape_xml(xml, node->as.link.url, strlen((char *)node->as.link.url));
       cmark_strbuf_putc(xml, '"');
-      cmark_strbuf_puts(xml, " title=\"");
-      escape_xml(xml, node->as.link.title.data, node->as.link.title.len);
-      cmark_strbuf_putc(xml, '"');
+      if (node->as.link.title) {
+        cmark_strbuf_puts(xml, " title=\"");
+        escape_xml(xml, node->as.link.title,
+                   strlen((char *)node->as.link.title));
+        cmark_strbuf_putc(xml, '"');
+      }
       break;
     default:
       break;
@@ -149,7 +152,7 @@ static int S_render_node(cmark_node *node, cmark_event_type ev_type,
 
 char *cmark_render_xml(cmark_node *root, int options) {
   char *result;
-  cmark_strbuf xml = CMARK_BUF_INIT(cmark_node_mem(root));
+  cmark_strbuf xml = CMARK_BUF_INIT(root->mem);
   cmark_event_type ev_type;
   cmark_node *cur;
   struct render_state state = {&xml, 0};

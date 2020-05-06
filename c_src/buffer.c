@@ -10,7 +10,6 @@
 #include "config.h"
 #include "cmark_ctype.h"
 #include "buffer.h"
-#include "memory.h"
 
 /* Used as default value for cmark_strbuf->ptr so that people can always
  * assume ptr is non-NULL and zero terminated even for new cmark_strbufs.
@@ -42,8 +41,12 @@ void cmark_strbuf_grow(cmark_strbuf *buf, bufsize_t target_size) {
   if (target_size < buf->asize)
     return;
 
-  if (target_size > (bufsize_t)(INT32_MAX / 2))
+  if (target_size > (bufsize_t)(INT32_MAX / 2)) {
+    fprintf(stderr,
+      "[cmark] cmark_strbuf_grow requests buffer with size > %d, aborting\n",
+         (INT32_MAX / 2));
     abort();
+  }
 
   /* Oversize the buffer by 50% to guarantee amortized linear time
    * complexity on append operations. */
