@@ -33,13 +33,20 @@ defmodule Cmark do
 
   # c_src/cmark.h -> CMARK_OPT_*
   @flags %{
-    sourcepos: 2,        # (1 <<< 1)
-    hardbreaks: 4,       # (1 <<< 2)
-    nobreaks: 16,        # (1 <<< 4)
-    normalize: 256,      # (1 <<< 8)
-    validate_utf8: 512,  # (1 <<< 9)
-    smart: 1024,         # (1 <<< 10)
-    unsafe: 131072       # (1 <<< 17)
+    # (1 <<< 1)
+    sourcepos: 2,
+    # (1 <<< 2)
+    hardbreaks: 4,
+    # (1 <<< 4)
+    nobreaks: 16,
+    # (1 <<< 8)
+    normalize: 256,
+    # (1 <<< 9)
+    validate_utf8: 512,
+    # (1 <<< 10)
+    smart: 1024,
+    # (1 <<< 17)
+    unsafe: 131_072
   }
 
   @typedoc "A list of atoms describing the options to use (see module docs)"
@@ -57,7 +64,7 @@ defmodule Cmark do
       "<p>test</p>\n"
 
   """
-  @spec to_html(String.t, options_list) :: String.t
+  @spec to_html(String.t(), options_list) :: String.t()
   def to_html(document, options_list \\ [])
       when is_binary(document) and is_list(options_list) do
     convert(document, options_list, @html_id)
@@ -74,7 +81,7 @@ defmodule Cmark do
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\">\n  <paragraph>\n    <text xml:space=\"preserve\">test</text>\n  </paragraph>\n</document>\n"
 
   """
-  @spec to_xml(String.t, options_list) :: String.t
+  @spec to_xml(String.t(), options_list) :: String.t()
   def to_xml(document, options_list \\ [])
       when is_binary(document) and is_list(options_list) do
     convert(document, options_list, @xml_id)
@@ -91,7 +98,7 @@ defmodule Cmark do
       ".PP\ntest\n"
 
   """
-  @spec to_man(String.t, options_list) :: String.t
+  @spec to_man(String.t(), options_list) :: String.t()
   def to_man(document, options_list \\ [])
       when is_binary(document) and is_list(options_list) do
     convert(document, options_list, @man_id)
@@ -108,7 +115,7 @@ defmodule Cmark do
       "test\n"
 
   """
-  @spec to_commonmark(String.t, options_list) :: String.t
+  @spec to_commonmark(String.t(), options_list) :: String.t()
   def to_commonmark(document, options_list \\ [])
       when is_binary(document) and is_list(options_list) do
     convert(document, options_list, @commonmark_id)
@@ -125,7 +132,7 @@ defmodule Cmark do
       "test\n"
 
   """
-  @spec to_latex(String.t, options_list) :: String.t
+  @spec to_latex(String.t(), options_list) :: String.t()
   def to_latex(document, options_list \\ [])
       when is_binary(document) and is_list(options_list) do
     convert(document, options_list, @latex_id)
