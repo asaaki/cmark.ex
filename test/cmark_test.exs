@@ -6,7 +6,9 @@ defmodule CmarkTest do
     assert Cmark.to_man("") == "\n"
     assert Cmark.to_commonmark("") == "\n"
     assert Cmark.to_latex("") == "\n"
-    assert Cmark.to_xml("") == "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\" />\n"
+
+    assert Cmark.to_xml("") ==
+             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE document SYSTEM \"CommonMark.dtd\">\n<document xmlns=\"http://commonmark.org/xml/1.0\" />\n"
   end
 
   test "UTF-8" do
@@ -38,13 +40,15 @@ defmodule CmarkTest do
   for markdown <- @invalid_when_safe do
     test "Removes HTML by default: #{markdown}" do
       real_markdown = unquote(markdown)
-      actual_html  = Cmark.to_html(real_markdown)
+      actual_html = Cmark.to_html(real_markdown)
       expected_html = "<!-- raw HTML omitted -->\n"
+
       error_message = """
-      MARKDOWN: #{inspect real_markdown}
-      ACTUAL:   #{inspect actual_html}
-      EXPECTED: #{inspect expected_html}
+      MARKDOWN: #{inspect(real_markdown)}
+      ACTUAL:   #{inspect(actual_html)}
+      EXPECTED: #{inspect(expected_html)}
       """
+
       assert actual_html == expected_html, error_message
     end
   end

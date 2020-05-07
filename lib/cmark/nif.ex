@@ -10,7 +10,7 @@ defmodule Cmark.Nif do
   end
 
   @doc false
-  @spec render(String.t, integer, integer) :: String.t
+  @spec render(String.t(), integer, integer) :: String.t()
   def render(_data, _options, _format),
     do: exit(:nif_library_not_loaded)
 end
