@@ -4,6 +4,7 @@
 *.dylib
 *.elf
 *.ez
+*.exp
 *.ko
 *.lib
 *.o
@@ -15,5 +16,6 @@
 /deps
 /doc
 /docs
+/Makefile.auto.win
 /tmp
 erl_crash.dump
