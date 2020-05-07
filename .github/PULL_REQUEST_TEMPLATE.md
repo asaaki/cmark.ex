@@ -1,5 +1,3 @@
-
-
 ## Proposed Changes summary
   
   -
