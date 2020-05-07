@@ -57,7 +57,10 @@ defmodule Cmark.Mixfile do
       extras: ["README.md"],
       main: "readme",
       source_ref: "v#{@version}",
-      source_url: "https://github.com/asaaki/cmark.ex"
+      source_url: "https://github.com/asaaki/cmark.ex",
+      assets: "assets",
+      logo: "assets/cmark_ex_logo_docs.png",
+      cover: "assets/cmark_ex_logo.png"
     ]
   end
 
