@@ -1,7 +1,7 @@
 defmodule Cmark.Mixfile do
   use Mix.Project
 
-  @version "0.8.0"
+  @version "0.9.0"
 
   def project do
     [
@@ -45,8 +45,10 @@ defmodule Cmark.Mixfile do
         "lib",
         "LICENSE",
         "Makefile",
+        "Makefile.win",
         "mix.exs",
         "README.md",
+        "README.windows.md",
         "src"
       ]
     ]
@@ -54,7 +56,7 @@ defmodule Cmark.Mixfile do
 
   defp docs do
     [
-      extras: ["README.md"],
+      extras: ["README.md", "README.windows.md"],
       main: "readme",
       source_ref: "v#{@version}",
       source_url: "https://github.com/asaaki/cmark.ex",
