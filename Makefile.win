@@ -55,8 +55,8 @@ $(NIF_LIB): $(C_SRC_O_FILES)
     $(CC) $(CFLAGS) -I"$(ERTS_INCLUDE_PATH)" $(OPTIONS) $(C_SRC_O_FILES) $(NIF_SRC) -o $@
 
 !ELSE
-app: Makefile.auto.win
-	$(NMAKE) /F Makefile.win app
+$(NIF_LIB): Makefile.auto.win
+	$(NMAKE) /F Makefile.win $(NIF_LIB)
 !ENDIF
 
 {$(C_SRC_DIR)}.c{$(C_SRC_DIR)}.o:
