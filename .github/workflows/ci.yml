@@ -57,4 +57,4 @@ jobs:
         mix hex.outdated
 
     - name: Report coverage
-      run: mix coveralls.travis
+      run: mix coveralls.github
