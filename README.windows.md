@@ -40,6 +40,8 @@ Very tricky topic, but you need to figure out the full path to the `clang` bin f
 
 Open a fresh PowerShell after this change.
 
+You can verify this by running `$env:path` in the shell, it should have the path to clang included.
+
 References:
 - https://developercommunity.visualstudio.com/idea/875419/how-to-use-msvc-installed-c-clang-tools-for-window.html
 
@@ -52,7 +54,8 @@ Most likely you want to run this:
 ```shell
 cmd /K "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64
 ```
-(unless you have already adjusted PATH and other env vars; but I guess it will also set other useful variables I'm not aware of.)
+
+It is very important to use **`amd64`**, no other configuration seems to work. 
 
 Afterwards a valiantly typed `mix do deps.get, compile` should hopefully result in a great success.
 
