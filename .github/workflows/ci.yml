@@ -1,0 +1,60 @@
+name: CI
+env:
+  MIX_ENV: ci
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+
+    strategy:
+      matrix:
+        otp: [22.3, 21.3]
+        elixir: [1.10, 1.9, 1.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-mix-
+
+    - uses: actions/cache@v1
+      with:
+        path: _build/ci
+        key: ${{ runner.os }}-build-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+
+    - uses: actions/setup-elixir@v1
+      with:
+        otp-version: ${{matrix.otp}}
+        elixir-version: ${{matrix.elixir}}
+
+    - name: Install Dependencies
+      run: |
+        mix local.rebar --force
+        mix local.hex --force
+        mix deps.get
+        mix compile
+
+    - name: Run tests
+      run: mix test
+
+    - name: Run quality steps
+      run: |
+        mix credo --strict
+        mix inch.report
+        mix hex.outdated
+
+    - name: Report coverage
+      run: mix coveralls.travis
