@@ -1,0 +1,63 @@
+### MVP for a NMake compatible version
+
+CC=clang
+NMAKE = nmake /$(MAKEFLAGS) /nologo
+
+!IF [where /Q Makefile.auto.win]
+# The file doesn't exist, so don't include it.
+!ELSE
+!INCLUDE Makefile.auto.win
+!ENDIF
+
+PRIV_DIR = priv
+SRC_DIR = src
+C_SRC_DIR = c_src
+# TODO: Find a way for nmake to support this pattern, too:
+# C_SRC_C_FILES = $(sort $(wildcard $(C_SRC_DIR)/*.c))
+C_SRC_C_FILES = \
+    $(C_SRC_DIR)\blocks.c \
+    $(C_SRC_DIR)\cmark.c \
+    $(C_SRC_DIR)\commonmark.c \
+    $(C_SRC_DIR)\houdini_html_e.c \
+    $(C_SRC_DIR)\html.c \
+    $(C_SRC_DIR)\iterator.c \
+    $(C_SRC_DIR)\man.c \
+    $(C_SRC_DIR)\references.c \
+    $(C_SRC_DIR)\scanners.c  \
+    $(C_SRC_DIR)\xml.c \
+    $(C_SRC_DIR)\buffer.c \
+    $(C_SRC_DIR)\cmark_ctype.c \
+    $(C_SRC_DIR)\houdini_href_e.c \
+    $(C_SRC_DIR)\houdini_html_u.c \
+    $(C_SRC_DIR)\inlines.c \
+    $(C_SRC_DIR)\latex.c \
+    $(C_SRC_DIR)\node.c \
+    $(C_SRC_DIR)\render.c \
+    $(C_SRC_DIR)\utf8.c
+C_SRC_O_FILES = $(C_SRC_C_FILES:.c=.o)
+NIF_SRC = $(SRC_DIR)\cmark_nif.c
+NIF_LIB=$(PRIV_DIR)\cmark.dll
+
+OPTIONS = -shared
+INCLUDES = -I"$(C_SRC_DIR)"
+CFLAGS = -target x86_64-pc-windows-msvc -O2 $(INCLUDES)
+CMARK_OPTFLAGS = -DNDEBUG
+
+all: $(NIF_LIB)
+
+Makefile.auto.win:
+	echo # Auto-generated as part of Makefile.win, do not modify. > $@
+	erl -eval "io:format(\"~s~n\", [lists:concat([\"ERTS_INCLUDE_PATH=\", code:root_dir(), \"/erts-\", erlang:system_info(version), \"/include\"])])" -s init stop -noshell >> $@
+
+!IFDEF ERTS_INCLUDE_PATH
+$(NIF_LIB): $(C_SRC_O_FILES)
+    if NOT EXIST "priv" mkdir "priv"
+    $(CC) $(CFLAGS) -I"$(ERTS_INCLUDE_PATH)" $(OPTIONS) $(C_SRC_O_FILES) $(NIF_SRC) -o $@
+
+!ELSE
+$(NIF_LIB): Makefile.auto.win
+	$(NMAKE) /F Makefile.win $(NIF_LIB)
+!ENDIF
+
+{$(C_SRC_DIR)}.c{$(C_SRC_DIR)}.o:
+	$(CC) $(CMARK_OPTFLAGS) $(CFLAGS) -o $@ -c $<
