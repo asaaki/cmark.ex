@@ -1,0 +1,63 @@
+name: CI
+env:
+  MIX_ENV: ci
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CC: clang
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: OTP ${{matrix.otp}} | Elixir ${{matrix.elixir}} | ${{matrix.cc}}
+
+    strategy:
+      matrix:
+        otp: [22.3, 21.3]
+        elixir: [1.10.3, 1.9.4, 1.8.2]
+        cc: [gcc, clang]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-mix-
+
+    - uses: actions/cache@v1
+      with:
+        path: _build/ci
+        key: ${{ runner.os }}-build-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-build-
+
+    - uses: actions/setup-elixir@v1
+      with:
+        otp-version: ${{matrix.otp}}
+        elixir-version: ${{matrix.elixir}}
+
+    - name: Install Dependencies
+      run: mix deps.get
+
+    - name: Compile project
+      run: mix compile
+      env:
+        CC: ${{ matrix.cc }}
+
+    - name: Run tests
+      run: mix test
+
+    - name: Run quality steps
+      run: |
+        mix credo --strict
+        mix inch.report
+        mix hex.outdated
+
+    - name: Report coverage
+      run: mix coveralls.github
