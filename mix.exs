@@ -1,13 +1,17 @@
 defmodule Cmark.Mixfile do
   use Mix.Project
 
-  @version "0.9.0"
+
+  # MSEV = minimum supported Elixir version;
+  # Until there is a breaking change, we can stick to the lowest known
+  # version stated here.
+  @msev "~> 1.8"
 
   def project do
     [
       app: :cmark,
       version: @version,
-      elixir: "~> 1.8",
+      elixir: @msev,
       compilers: [:elixir_make, :elixir, :app],
       deps: deps(),
       package: package(),
