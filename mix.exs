@@ -1,6 +1,7 @@
 defmodule Cmark.Mixfile do
   use Mix.Project
 
+  @version "0.10.0"
 
   # MSEV = minimum supported Elixir version;
   # Until there is a breaking change, we can stick to the lowest known
