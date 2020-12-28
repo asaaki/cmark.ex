@@ -10,12 +10,18 @@
 #include "houdini.h"
 
 #define BUFFER_SIZE 100
+#define MAX_INDENT 40
 
 // Functions to convert cmark_nodes to XML strings.
 
 static void escape_xml(cmark_strbuf *dest, const unsigned char *source,
                        bufsize_t length) {
   houdini_escape_html0(dest, source, length, 0);
+}
+
+static void escape_xml_str(cmark_strbuf *dest, const unsigned char *source) {
+  if (source)
+    escape_xml(dest, source, strlen((char *)source));
 }
 
 struct render_state {
@@ -25,7 +31,7 @@ struct render_state {
 
 static CMARK_INLINE void indent(struct render_state *state) {
   int i;
-  for (i = 0; i < state->indent; i++) {
+  for (i = 0; i < state->indent && i < MAX_INDENT; i++) {
     cmark_strbuf_putc(state->xml, ' ');
   }
 }
@@ -97,7 +103,7 @@ static int S_render_node(cmark_node *node, cmark_event_type ev_type,
     case CMARK_NODE_CODE_BLOCK:
       if (node->as.code.info) {
         cmark_strbuf_puts(xml, " info=\"");
-        escape_xml(xml, node->as.code.info, strlen((char *)node->as.code.info));
+        escape_xml_str(xml, node->as.code.info);
         cmark_strbuf_putc(xml, '"');
       }
       cmark_strbuf_puts(xml, " xml:space=\"preserve\">");
@@ -109,23 +115,20 @@ static int S_render_node(cmark_node *node, cmark_event_type ev_type,
     case CMARK_NODE_CUSTOM_BLOCK:
     case CMARK_NODE_CUSTOM_INLINE:
       cmark_strbuf_puts(xml, " on_enter=\"");
-      escape_xml(xml, node->as.custom.on_enter,
-                 strlen((char *)node->as.custom.on_enter));
+      escape_xml_str(xml, node->as.custom.on_enter);
       cmark_strbuf_putc(xml, '"');
       cmark_strbuf_puts(xml, " on_exit=\"");
-      escape_xml(xml, node->as.custom.on_exit,
-                 strlen((char *)node->as.custom.on_exit));
+      escape_xml_str(xml, node->as.custom.on_exit);
       cmark_strbuf_putc(xml, '"');
       break;
     case CMARK_NODE_LINK:
     case CMARK_NODE_IMAGE:
       cmark_strbuf_puts(xml, " destination=\"");
-      escape_xml(xml, node->as.link.url, strlen((char *)node->as.link.url));
+      escape_xml_str(xml, node->as.link.url);
       cmark_strbuf_putc(xml, '"');
       if (node->as.link.title) {
         cmark_strbuf_puts(xml, " title=\"");
-        escape_xml(xml, node->as.link.title,
-                   strlen((char *)node->as.link.title));
+        escape_xml_str(xml, node->as.link.title);
         cmark_strbuf_putc(xml, '"');
       }
       break;
