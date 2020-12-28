@@ -69,9 +69,9 @@ defmodule Cmark.Mixfile do
   defp deps do
     [
       {:elixir_make, "~> 0.6"},
-      {:credo, "~> 1.4", only: [:lint, :ci]},
-      {:ex_doc, "~> 0.21", only: [:dev, :docs, :ci]},
-      {:excoveralls, "~> 0.6", only: :ci},
+      {:credo, "~> 1.5", only: [:lint, :ci]},
+      {:ex_doc, "~> 0.23", only: [:dev, :docs, :ci]},
+      {:excoveralls, "~> 0.13", only: :ci},
       {:inch_ex, "~> 2.0", only: [:docs, :ci]},
       {:jason, "~> 1.2", only: [:dev, :test, :docs, :lint, :ci], override: true},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
