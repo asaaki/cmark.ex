@@ -17,8 +17,8 @@ jobs:
 
     strategy:
       matrix:
-        otp: [22.3, 21.3]
-        elixir: [1.10.3, 1.9.4, 1.8.2]
+        otp: [23.2, 22.3]
+        elixir: [1.11.2, 1.10.4]
         cc: [gcc, clang]
 
     steps:
