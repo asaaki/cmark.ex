@@ -1,12 +1,14 @@
+# https://docs.github.com/en/code-security/supply-chain-security/configuration-options-for-dependency-updates
 version: 2
+
 updates:
+
 - package-ecosystem: mix
   directory: "/"
   schedule:
-    interval: daily
-    time: "04:00"
-  open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: dialyxir
-    versions:
-    - 1.1.0
+    interval: daily # default: 05:00 UTC
+
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: daily # default: 05:00 UTC
