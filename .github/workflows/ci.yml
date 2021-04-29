@@ -56,3 +56,5 @@ jobs:
 
     - name: Report coverage
       run: mix coveralls.github
+      # even if we cannot send the report, the build is still okay
+      continue-on-error: true
