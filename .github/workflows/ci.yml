@@ -58,6 +58,8 @@ jobs:
         mix hex.outdated
 
     - name: Report coverage
-      run: mix coveralls.github
+      run: |
+        mix deps.update certifi
+        mix coveralls.github
       # even if we cannot send the report, the build is still okay
       continue-on-error: true
