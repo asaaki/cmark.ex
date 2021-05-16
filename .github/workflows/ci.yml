@@ -72,7 +72,6 @@ jobs:
         elixir-version: '1.11'
 
     - run: mix deps.get
-    - run: mix deps.update certifi
     - run: mix compile
     - run: mix credo --strict
     - run: mix inch.report
