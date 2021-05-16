@@ -52,12 +52,14 @@ jobs:
       run: mix test
 
     - name: Run quality steps
+      if: ${{ matrix.otp == '23' && matrix.elixir == '1.11' && matrix.cc == 'clang' }}
       run: |
         mix credo --strict
         mix inch.report
         mix hex.outdated
 
     - name: Report coverage
+      if: ${{ matrix.otp == '23' && matrix.elixir == '1.11' && matrix.cc == 'clang' }}
       run: |
         mix deps.update certifi
         mix coveralls.github
