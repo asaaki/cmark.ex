@@ -42,16 +42,13 @@ jobs:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
 
-    - name: Install Dependencies
-      run: mix deps.get
+    - run: mix deps.get
 
-    - name: Compile project
-      run: mix compile
+    - run: mix compile
       env:
         CC: ${{ matrix.cc }}
 
-    - name: Run tests
-      run: mix test
+    - run: mix test
 
   quality:
     name: Quality checks
@@ -74,11 +71,8 @@ jobs:
         otp-version: 23
         elixir-version: '1.11'
 
-    - name: Install Dependencies
-      run: |
-        mix deps.get
-        mix deps.update certifi
-
+    - run: mix deps.get
+    - run: mix deps.update certifi
     - run: mix compile
     - run: mix credo --strict
     - run: mix inch.report
