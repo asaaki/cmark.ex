@@ -28,11 +28,14 @@ jobs:
         path: |
           deps
           _build
-        key: ${{ runner.os }}-${{matrix.otp}}-${{matrix.elixir}}-${{matrix.cc}}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        key: ${{ runner.os }}-${{matrix.otp}}-${{matrix.elixir}}-${{matrix.cc}}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
         restore-keys: |
-          ${{ runner.os }}-mix-
+          ${{ runner.os }}-${{matrix.otp}}-${{matrix.elixir}}-${{matrix.cc}}-
+          ${{ runner.os }}-${{matrix.otp}}-${{matrix.elixir}}-
+          ${{ runner.os }}-${{matrix.otp}}-
+          ${{ runner.os }}-
 
-    - uses: erlef/setup-elixir@v1.7
+    - uses: erlef/setup-elixir@v1.7.1
       with:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
