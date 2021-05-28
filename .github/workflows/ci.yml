@@ -76,4 +76,6 @@ jobs:
     - run: mix credo --strict
     - run: mix inch.report
     - run: mix hex.outdated
+      # skip step for dependabot, since it is the reason it opens a PR
+      if: github.actor != 'dependabot[bot]'
     - run: mix coveralls.github
