@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     if: github.actor == 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: ahmadnassri/action-dependabot-auto-merge@v2.6
         with:
           target: patch
