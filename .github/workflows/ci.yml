@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         otp: [24, 23, 22]
-        elixir: ['1.11', '1.10']
+        elixir: ['1.13', '1.12', '1.11']
         cc: [gcc, clang]
 
     steps:
@@ -37,7 +37,7 @@ jobs:
           ${{ runner.os }}-${{matrix.otp}}-
           ${{ runner.os }}-
 
-    - uses: erlef/setup-elixir@v1.12
+    - uses: erlef/setup-beam@v1
       with:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
@@ -66,10 +66,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-quality
 
-    - uses: erlef/setup-elixir@v1.12
+    - uses: erlef/setup-beam@v1
       with:
-        otp-version: 23
-        elixir-version: '1.11'
+        otp-version: 24
+        elixir-version: '1.13'
 
     - run: mix deps.get
     - run: mix compile
