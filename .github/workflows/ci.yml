@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        otp: [25, 24, 23]
+        otp: [25, 24]
         elixir: ['1.15', '1.14', '1.13']
         cc: [gcc, clang]
 
