@@ -15,12 +15,12 @@ jobs:
   build:
     name: OTP ${{matrix.otp}} | Elixir ${{matrix.elixir}} | ${{matrix.cc}}
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        otp: [24, 23, 22]
-        elixir: ['1.13', '1.12', '1.11']
+        otp: [25, 24, 23]
+        elixir: ['1.15', '1.14', '1.13']
         cc: [gcc, clang]
 
     steps:
@@ -53,7 +53,7 @@ jobs:
   quality:
     name: Quality checks
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -68,8 +68,8 @@ jobs:
 
     - uses: erlef/setup-beam@v1
       with:
-        otp-version: 24
-        elixir-version: '1.13'
+        otp-version: 25
+        elixir-version: '1.15'
 
     - run: mix deps.get
     - run: mix compile
